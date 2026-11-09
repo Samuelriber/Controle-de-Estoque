@@ -1,4 +1,4 @@
-package com.estoque.backend.MercadoriaRepository;
+package com.estoque.backend.repository;
 
 
 import jakarta.persistence.Entity;
