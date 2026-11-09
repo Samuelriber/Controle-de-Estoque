@@ -1,9 +1,9 @@
 package com.estoque.backend.repository;
 
 
-import jakarta.persistence.Entity;
+import com.estoque.backend.model.Mercadoria;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Entity
-public interface NomeDoRepository extends JpaRepository<Entidade, TipoDoId> {
+public interface MercadoriaRepository extends JpaRepository<Mercadoria, Long> {
 
 }
