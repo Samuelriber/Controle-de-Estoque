@@ -1,7 +1,8 @@
-package com.estoque.backend.repository;
-
-import com.estoque.backend.model.Estoque;
+package com.estoque.backend.repository; //acesso ao banco
+ 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
+import com.estoque.backend.model.Estoque;
+ 
+public interface EstoqueRepository extends JpaRepository<Estoque, Integer> {
 }

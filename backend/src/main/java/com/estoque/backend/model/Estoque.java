@@ -1,77 +1,42 @@
 package com.estoque.backend.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import jakarta.persistence.*;
-
-import java.math.BigDecimal;
-
-
-@Entity
-@Table(name = "estoques")
+@Entity // Mostra que representa uma tabela do banco
+@Table(name = "estoque")//nome da tabela no banco
+@Getter
+@Setter
+@NoArgsConstructor
 public class Estoque {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_estoque")
+    private Integer id;
 
-    private BigDecimal quantidade;
-    private BigDecimal quantidadeMinima;
-    private BigDecimal quantidadeMaxima;
-    private String  localizacao;
+    @Column(name = "quantidade", nullable = false)
+    private Integer quantidade;
 
-    @ManyToOne
-    @JoinColumn(name = "mercadoria_id")
+    @Column(name = "quant_min", nullable = false)
+    private Integer quantidadeMinima;
+
+    @Column(name = "quant_max", nullable = false)
+    private Integer quantidadeMaxima;
+
+    @Column(name = "localizacao", nullable = false, length = 100)
+    private String localizacao;
+
+    @ManyToOne(optional = false) // n para 1
+    @JoinColumn(name = "id_merc", nullable = false)  // Conecta as tabelas, muitos estoques para uma mercadoria
     private Mercadoria mercadoria;
-
-    public Estoque() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public BigDecimal getQuantidade() {
-        return quantidade;
-    }
-
-    public BigDecimal getQuantidadeMinima() {
-        return quantidadeMinima;
-    }
-
-    public BigDecimal getQuantidadeMaxima() {
-        return quantidadeMaxima;
-    }
-
-    public String  getLocalizacao() {
-        return localizacao;
-    }
-
-    public Mercadoria getMercadoria() {
-        return mercadoria;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setQuantidade(BigDecimal quantidade) {
-        this.quantidade = quantidade;
-    }
-
-    public void setQuantidadeMinima(BigDecimal quantidadeMinima) {
-        this.quantidadeMinima = quantidadeMinima;
-    }
-
-    public void setQuantidadeMaxima(BigDecimal quantidadeMaxima) {
-        this.quantidadeMaxima = quantidadeMaxima;
-    }
-
-    public void setLocalizacao(String  localizacao) {
-        this.localizacao = localizacao;
-    }
-
-    public void setMercadoria(Mercadoria mercadoria) {
-        this.mercadoria = mercadoria;
-    }
 }
