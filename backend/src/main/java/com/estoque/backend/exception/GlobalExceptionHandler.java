@@ -19,6 +19,12 @@ public class GlobalExceptionHandler {
                 .body(ErroResponse.de(404, ex.getMessage()));
     }
 
+    @ExceptionHandler(RegraNegocioException.class)
+    public ResponseEntity<ErroResponse> regraNegocio(RegraNegocioException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErroResponse.de(400, ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponse> validacao(MethodArgumentNotValidException ex) {
         Map<String, String> campos = new LinkedHashMap<>();
