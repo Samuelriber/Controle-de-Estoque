@@ -3,6 +3,7 @@ package com.estoque.backend.controller;
 import com.estoque.backend.dto.EstoqueRequest;
 import com.estoque.backend.dto.EstoqueResponse;
 import com.estoque.backend.service.EstoqueService;
+import io.swagger.v3.oas.annotations.tags.Tag; // swagger
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Estoques", description = "Controle de estoque das mercadorias") // swagger
 @RestController
 @RequestMapping("/estoques")
 @RequiredArgsConstructor

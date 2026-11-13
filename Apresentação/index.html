@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controle de Estoque - Backend</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topo">
+  <button class="menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">&#9776;</button>
+  <div class="topo-titulo">
+    <strong>Controle de Estoque</strong>
+    <span>Como funciona o backend</span>
+  </div>
+  <button class="tema-btn" id="temaBtn" aria-label="Alternar tema claro e escuro">Tema</button>
+</header>
+
+<div class="layout">
+
+  <nav class="menu" id="menu" aria-label="Partes do backend">
+    <p class="menu-rotulo">Partes do backend</p>
+    <a href="#visao" data-secao="visao" class="ativo"><span>1</span> Visão geral</a>
+    <a href="#fluxo" data-secao="fluxo"><span>2</span> Caminho de uma requisição</a>
+    <a href="#banco" data-secao="banco"><span>3</span> Banco de dados</a>
+    <a href="#model" data-secao="model"><span>4</span> Model (entidades)</a>
+    <a href="#repository" data-secao="repository"><span>5</span> Repository</a>
+    <a href="#dto" data-secao="dto"><span>6</span> DTO</a>
+    <a href="#service" data-secao="service"><span>7</span> Service</a>
+    <a href="#controller" data-secao="controller"><span>8</span> Controller</a>
+    <a href="#excecoes" data-secao="excecoes"><span>9</span> Tratamento de erros</a>
+    <a href="#swagger" data-secao="swagger"><span>10</span> Swagger</a>
+    <a href="#simulador" data-secao="simulador"><span>11</span> Simulador de requisições</a>
+  </nav>
+
+  <main class="conteudo" id="conteudo">
+
+    <!-- 1. VISAO GERAL -->
+    <section id="visao" class="secao ativa">
+      <h1>Visão geral</h1>
+      <p class="lead">Uma API REST em <strong>Java + Spring Boot</strong> que cadastra, consulta, altera e exclui <strong>mercadorias</strong> e o seu <strong>estoque</strong>, gravando tudo em um banco <strong>MySQL</strong>.</p>
+
+      <div class="grade">
+        <div class="cartao">
+          <h3>Duas entidades</h3>
+          <p><strong>Mercadoria:</strong> nome e preço.</p>
+          <p><strong>Estoque:</strong> quantidade, mínimo, máximo e localização. Cada estoque pertence a uma mercadoria.</p>
+        </div>
+        <div class="cartao">
+          <h3>API REST</h3>
+          <p>Quatro verbos HTTP: <code>GET</code> consulta, <code>POST</code> cadastra, <code>PUT</code> altera, <code>DELETE</code> exclui.</p>
+          <p>As rotas são <code>/mercadorias</code> e <code>/estoques</code>.</p>
+        </div>
+        <div class="cartao">
+          <h3>Tecnologias</h3>
+          <p>Java 21, Spring Boot 4, Spring Data JPA, MySQL, Bean Validation, Lombok e Swagger.</p>
+        </div>
+      </div>
+
+      <h2>As camadas</h2>
+      <p>O backend é dividido em camadas. Cada uma tem uma responsabilidade, e só conversa com a vizinha. Clique em uma camada para ver o que ela faz.</p>
+
+      <div class="camadas" id="camadas">
+        <button class="camada" data-camada="controller">Controller<small>recebe o HTTP</small></button>
+        <span class="seta" aria-hidden="true">&rarr;</span>
+        <button class="camada" data-camada="service">Service<small>regras de negócio</small></button>
+        <span class="seta" aria-hidden="true">&rarr;</span>
+        <button class="camada" data-camada="repository">Repository<small>acesso ao banco</small></button>
+        <span class="seta" aria-hidden="true">&rarr;</span>
+        <button class="camada" data-camada="banco">MySQL<small>guarda os dados</small></button>
+      </div>
+      <div class="explica" id="camadaTexto" aria-live="polite">Clique em uma das camadas acima.</div>
+
+      <h2>Estado do projeto</h2>
+      <ul class="status">
+        <li class="ok">Backend com Spring Boot</li>
+        <li class="ok">Duas entidades e relacionamento (chave estrangeira)</li>
+        <li class="ok">API REST completa (GET, POST, PUT, DELETE)</li>
+        <li class="ok">Validações e mensagens de erro</li>
+        <li class="ok">Script SQL e documentação Swagger</li>
+        <li class="falta">Frontend (cadastro, listagem, alteração e exclusão): ainda a fazer</li>
+      </ul>
+    </section>
+
+    <!-- 2. FLUXO -->
+    <section id="fluxo" class="secao">
+      <h1>Caminho de uma requisição</h1>
+      <p class="lead">Acompanhe o que acontece quando alguém cadastra um estoque: <code>POST /estoques</code>.</p>
+
+      <div class="fluxo">
+        <ol class="passos" id="passos"></ol>
+        <div class="painel-passo">
+          <div class="passo-cab">
+            <span class="passo-num" id="passoNum">1</span>
+            <h3 id="passoTitulo"></h3>
+          </div>
+          <p id="passoTexto"></p>
+          <pre class="codigo" id="passoCodigo"><code></code></pre>
+          <div class="controles">
+            <button class="botao sec" id="passoAnt">Anterior</button>
+            <span class="contador" id="passoContador"></span>
+            <button class="botao" id="passoProx">Próximo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. BANCO -->
+    <section id="banco" class="secao">
+      <h1>Banco de dados</h1>
+      <p class="lead">MySQL, banco <code>sistema_estoque</code>. Duas tabelas ligadas por uma <strong>chave estrangeira</strong>.</p>
+
+      <div class="er">
+        <div class="tabela">
+          <div class="tabela-nome">mercadoria</div>
+          <div class="campo"><b>id_merc</b><em>PK</em></div>
+          <div class="campo">nome</div>
+          <div class="campo">preco</div>
+        </div>
+        <div class="er-liga">
+          <span>1</span>
+          <div class="linha"></div>
+          <span>N</span>
+        </div>
+        <div class="tabela">
+          <div class="tabela-nome">estoque</div>
+          <div class="campo"><b>id_estoque</b><em>PK</em></div>
+          <div class="campo">quantidade</div>
+          <div class="campo">quant_min</div>
+          <div class="campo">quant_max</div>
+          <div class="campo">localizacao</div>
+          <div class="campo destaque"><b>id_merc</b><em>FK</em></div>
+        </div>
+      </div>
+      <p class="legenda">Uma mercadoria pode ter vários registros de estoque (por exemplo, em prateleiras diferentes). Cada estoque aponta para uma única mercadoria por <code>id_merc</code>.</p>
+
+      <h2>Script SQL</h2>
+      <pre class="codigo" data-copiar><code>CREATE TABLE mercadoria (
+    id_merc INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE estoque (
+    id_estoque INT AUTO_INCREMENT PRIMARY KEY,
+    quantidade INT NOT NULL,
+    quant_min INT NOT NULL,
+    quant_max INT NOT NULL,
+    localizacao VARCHAR(100) NOT NULL,
+    id_merc INT NOT NULL,
+    FOREIGN KEY (id_merc) REFERENCES mercadoria(id_merc),
+    CONSTRAINT chk_quantidade CHECK (quantidade >= 0),
+    CONSTRAINT chk_limites CHECK (quant_min >= 0 AND quant_max >= quant_min)
+);</code></pre>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li><strong>Chave primária:</strong> <code>AUTO_INCREMENT</code> faz o banco gerar os ids.</li>
+        <li><strong>Chave estrangeira:</strong> o banco impede um estoque de apontar para uma mercadoria que não existe.</li>
+        <li><strong>CHECK:</strong> o próprio banco recusa quantidade negativa e máximo menor que o mínimo.</li>
+        <li><strong>DECIMAL para o preço:</strong> guarda o valor exato, sem erros de arredondamento.</li>
+      </ul>
+    </section>
+
+    <!-- 4. MODEL -->
+    <section id="model" class="secao">
+      <h1>Model (entidades)</h1>
+      <p class="lead">Classes Java que representam as tabelas. Cada atributo vira uma coluna.</p>
+
+      <h2>Mercadoria</h2>
+      <pre class="codigo" data-copiar><code>@Entity // representa uma tabela do banco
+@Table(name = "mercadoria")
+@Getter @Setter @NoArgsConstructor
+public class Mercadoria {
+
+    @Id // chave primária
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto increment
+    @Column(name = "id_merc")
+    private Integer id;
+
+    @Column(name = "nome", nullable = false, length = 100)
+    private String nome;
+
+    @Column(name = "preco", nullable = false, precision = 10, scale = 2)
+    private BigDecimal preco;
+}</code></pre>
+
+      <h2>Estoque (com o relacionamento)</h2>
+      <pre class="codigo" data-copiar><code>@Entity
+@Table(name = "estoque")
+@Getter @Setter @NoArgsConstructor
+public class Estoque {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_estoque")
+    private Integer id;
+
+    @Column(name = "quantidade", nullable = false)
+    private Integer quantidade;
+
+    @Column(name = "quant_min", nullable = false)
+    private Integer quantidadeMinima;
+
+    @Column(name = "quant_max", nullable = false)
+    private Integer quantidadeMaxima;
+
+    @Column(name = "localizacao", nullable = false, length = 100)
+    private String localizacao;
+
+    @ManyToOne(optional = false) // muitos estoques para uma mercadoria
+    @JoinColumn(name = "id_merc", nullable = false) // coluna da chave estrangeira
+    private Mercadoria mercadoria;
+}</code></pre>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li><code>@Entity</code> e <code>@Table</code>: ligam a classe à tabela.</li>
+        <li><code>@Id</code> e <code>@GeneratedValue</code>: chave primária gerada pelo banco.</li>
+        <li><code>@ManyToOne</code> e <code>@JoinColumn</code>: criam o relacionamento e a chave estrangeira <code>id_merc</code>.</li>
+        <li><code>BigDecimal</code> no preço: valor exato, ao contrário de <code>double</code>.</li>
+        <li>Lombok (<code>@Getter</code>, <code>@Setter</code>): gera os getters e setters sem precisar escrevê-los.</li>
+      </ul>
+    </section>
+
+    <!-- 5. REPOSITORY -->
+    <section id="repository" class="secao">
+      <h1>Repository</h1>
+      <p class="lead">A camada de acesso aos dados. São interfaces vazias, e o Spring escreve o código por trás.</p>
+
+      <pre class="codigo" data-copiar><code>public interface MercadoriaRepository extends JpaRepository&lt;Mercadoria, Integer&gt; {
+}
+
+public interface EstoqueRepository extends JpaRepository&lt;Estoque, Integer&gt; {
+}</code></pre>
+
+      <p>Os dois tipos entre <code>&lt; &gt;</code> são a <strong>entidade</strong> e o <strong>tipo do id</strong>. Com isso, ganhamos sem escrever SQL:</p>
+      <div class="tabela-simples">
+        <div><code>findAll()</code><span>lista todos os registros (SELECT *)</span></div>
+        <div><code>findById(id)</code><span>busca um registro pelo id</span></div>
+        <div><code>save(obj)</code><span>insere ou atualiza (INSERT ou UPDATE)</span></div>
+        <div><code>deleteById(id)</code><span>exclui um registro (DELETE)</span></div>
+        <div><code>existsById(id)</code><span>diz se o id existe</span></div>
+      </div>
+    </section>
+
+    <!-- 6. DTO -->
+    <section id="dto" class="secao">
+      <h1>DTO</h1>
+      <p class="lead">DTO (Data Transfer Object) é o formato do JSON que <strong>entra</strong> e <strong>sai</strong> da API. A entidade não é exposta diretamente.</p>
+
+      <div class="duas">
+        <div>
+          <h3>Request: o que o cliente envia</h3>
+          <pre class="codigo" data-copiar><code>public record MercadoriaRequest(
+
+  @NotBlank(message = "O nome é obrigatório")
+  @Size(max = 100, message = "...")
+  String nome,
+
+  @NotNull(message = "O preço é obrigatório")
+  @PositiveOrZero(message = "O preço não pode ser negativo")
+  BigDecimal preco
+) {}</code></pre>
+        </div>
+        <div>
+          <h3>Response: o que a API devolve</h3>
+          <pre class="codigo" data-copiar><code>public record EstoqueResponse(
+  Integer id,
+  Integer quantidade,
+  Integer quantidadeMinima,
+  Integer quantidadeMaxima,
+  String localizacao,
+  Integer idMerc,
+  String nomeMercadoria
+) {}</code></pre>
+        </div>
+      </div>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li>O <strong>Request</strong> carrega as validações (<code>@NotBlank</code>, <code>@NotNull</code>, <code>@PositiveOrZero</code>...) com mensagens em português.</li>
+        <li>No cadastro de estoque, o cliente envia só o <code>idMerc</code>. Na resposta, a API devolve também o <code>nomeMercadoria</code>, para facilitar a tela.</li>
+        <li>O DTO <strong>não traz o id</strong> na entrada: o id é sempre gerado pelo banco.</li>
+        <li>São <code>record</code> do Java: classes imutáveis e curtas, ideais para transportar dados.</li>
+      </ul>
+    </section>
+
+    <!-- 7. SERVICE -->
+    <section id="service" class="secao">
+      <h1>Service</h1>
+      <p class="lead">Aqui ficam as <strong>regras de negócio</strong>. O controller pergunta, o service decide.</p>
+
+      <h2>A regra do estoque</h2>
+      <pre class="codigo" data-copiar><code>private void preencher(Estoque estoque, EstoqueRequest request) {
+
+    // regra 1: máximo não pode ser menor que o mínimo
+    if (request.quantidadeMaxima() &lt; request.quantidadeMinima()) {
+        throw new RegraNegocioException(
+            "A quantidade máxima não pode ser menor que a quantidade mínima");
+    }
+
+    // regra 2: a mercadoria precisa existir
+    Mercadoria mercadoria = mercadoriaRepository.findById(request.idMerc())
+        .orElseThrow(() -&gt; new RecursoNaoEncontradoException(
+            "Mercadoria não encontrada: id " + request.idMerc()));
+
+    estoque.setQuantidade(request.quantidade());
+    estoque.setQuantidadeMinima(request.quantidadeMinima());
+    estoque.setQuantidadeMaxima(request.quantidadeMaxima());
+    estoque.setLocalizacao(request.localizacao().trim());
+    estoque.setMercadoria(mercadoria);
+}</code></pre>
+
+      <h2>Os métodos do service</h2>
+      <div class="tabela-simples">
+        <div><code>listar()</code><span>busca tudo e converte cada item em Response</span></div>
+        <div><code>buscar(id)</code><span>busca um; se não existir, lança erro 404</span></div>
+        <div><code>criar(request)</code><span>cria uma entidade nova, preenche e salva</span></div>
+        <div><code>atualizar(id, request)</code><span>busca a existente, preenche de novo e salva</span></div>
+        <div><code>excluir(id)</code><span>confere se existe e exclui</span></div>
+      </div>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li><code>@Service</code> marca a classe como camada de regras de negócio.</li>
+        <li><code>@Transactional</code>: a operação acontece por inteiro ou não acontece. Se der erro no meio, o banco volta ao que era.</li>
+        <li><code>@Transactional(readOnly = true)</code> nas consultas, que só leem.</li>
+        <li>Criar e atualizar usam o <strong>mesmo método</strong> <code>preencher</code>, então as regras valem para os dois.</li>
+        <li><code>trim()</code> remove espaços sobrando no começo e no fim dos textos.</li>
+      </ul>
+    </section>
+
+    <!-- 8. CONTROLLER -->
+    <section id="controller" class="secao">
+      <h1>Controller</h1>
+      <p class="lead">A porta de entrada da API. Recebe a requisição HTTP, valida e chama o service.</p>
+
+      <pre class="codigo" data-copiar><code>@Tag(name = "Mercadorias", description = "Cadastro e consulta de mercadorias")
+@RestController
+@RequestMapping("/mercadorias")
+@RequiredArgsConstructor
+public class MercadoriaController {
+
+    private final MercadoriaService service;
+
+    @GetMapping
+    public List&lt;MercadoriaResponse&gt; listar() {
+        return service.listar();
+    }
+
+    @GetMapping("/{id}")
+    public MercadoriaResponse buscar(@PathVariable Integer id) {
+        return service.buscar(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public MercadoriaResponse criar(@Valid @RequestBody MercadoriaRequest request) {
+        return service.criar(request);
+    }
+
+    @PutMapping("/{id}")
+    public MercadoriaResponse atualizar(@PathVariable Integer id,
+                                        @Valid @RequestBody MercadoriaRequest request) {
+        return service.atualizar(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable Integer id) {
+        service.excluir(id);
+    }
+}</code></pre>
+
+      <h2>Cada anotação</h2>
+      <div class="tabela-simples">
+        <div><code>@RestController</code><span>a classe responde HTTP e devolve JSON</span></div>
+        <div><code>@RequestMapping("/mercadorias")</code><span>prefixo da URL de todos os métodos</span></div>
+        <div><code>@GetMapping</code><span>consulta (GET)</span></div>
+        <div><code>@PostMapping</code><span>cadastro (POST), responde 201 Created</span></div>
+        <div><code>@PutMapping("/{id}")</code><span>alteração (PUT)</span></div>
+        <div><code>@DeleteMapping("/{id}")</code><span>exclusão (DELETE), responde 204 No Content</span></div>
+        <div><code>@PathVariable</code><span>lê o id que vem na URL</span></div>
+        <div><code>@RequestBody</code><span>lê o JSON enviado no corpo</span></div>
+        <div><code>@Valid</code><span>valida o JSON antes de entrar no método</span></div>
+        <div><code>@RequiredArgsConstructor</code><span>Lombok cria o construtor que recebe o service</span></div>
+      </div>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li>O controller <strong>não tem regra de negócio</strong>: só recebe, valida e repassa ao service.</li>
+        <li>Os códigos HTTP são escolhidos de propósito: <code>201</code> ao criar e <code>204</code> ao excluir.</li>
+        <li>O <code>EstoqueController</code> é igual, com a rota <code>/estoques</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 9. EXCECOES -->
+    <section id="excecoes" class="secao">
+      <h1>Tratamento de erros</h1>
+      <p class="lead">Todo erro passa pelo <code>GlobalExceptionHandler</code>, que devolve sempre um JSON padronizado, com uma mensagem clara.</p>
+
+      <div class="erros">
+        <div class="erro e404">
+          <span class="codigo-http">404</span>
+          <h3>Não encontrado</h3>
+          <p><code>RecursoNaoEncontradoException</code></p>
+          <p>O id pedido não existe.</p>
+        </div>
+        <div class="erro e400">
+          <span class="codigo-http">400</span>
+          <h3>Regra de negócio</h3>
+          <p><code>RegraNegocioException</code></p>
+          <p>Máximo menor que o mínimo.</p>
+        </div>
+        <div class="erro e400">
+          <span class="codigo-http">400</span>
+          <h3>Dados inválidos</h3>
+          <p><code>MethodArgumentNotValidException</code></p>
+          <p>O JSON falhou nas validações.</p>
+        </div>
+        <div class="erro e409">
+          <span class="codigo-http">409</span>
+          <h3>Conflito</h3>
+          <p><code>DataIntegrityViolationException</code></p>
+          <p>Excluir mercadoria que tem estoque.</p>
+        </div>
+      </div>
+
+      <h2>O handler</h2>
+      <pre class="codigo" data-copiar><code>@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity&lt;ErroResponse&gt; naoEncontrado(RecursoNaoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErroResponse.de(404, ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity&lt;ErroResponse&gt; integridade(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErroResponse.de(409,
+                    "Operação não permitida: o registro está relacionado a outros dados"));
+    }
+    // ... e os handlers de 400
+}</code></pre>
+
+      <h2>O formato do erro</h2>
+      <pre class="codigo" data-copiar><code>{
+  "status": 400,
+  "mensagem": "Dados inválidos",
+  "campos": {
+    "nome": "O nome é obrigatório",
+    "preco": "O preço não pode ser negativo"
+  }
+}</code></pre>
+
+      <h2>O que explicar</h2>
+      <ul class="pontos">
+        <li><code>@RestControllerAdvice</code> faz uma classe ouvir os erros de <strong>todos</strong> os controllers.</li>
+        <li>Sem isso, o Spring mostraria uma página de erro feia. Com isso, o frontend recebe um JSON com a <code>mensagem</code>, pronto para exibir ao usuário.</li>
+        <li>Nos erros de validação, <code>campos</code> diz exatamente qual campo falhou e por quê.</li>
+      </ul>
+    </section>
+
+    <!-- 10. SWAGGER -->
+    <section id="swagger" class="secao">
+      <h1>Swagger</h1>
+      <p class="lead">Uma página gerada automaticamente que <strong>documenta a API e permite testá-la</strong> no navegador.</p>
+
+      <div class="cartao destaque-cartao">
+        <p>Com o backend rodando, abra:</p>
+        <p><code>http://localhost:8080/swagger-ui/index.html</code></p>
+      </div>
+
+      <h2>Como foi feito</h2>
+      <ol class="numerada">
+        <li>Dependência <code>springdoc-openapi-starter-webmvc-ui</code> no <code>pom.xml</code>.</li>
+        <li>Uma classe de configuração com o título e a descrição:
+<pre class="codigo" data-copiar><code>@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI apiInfo() {
+        return new OpenAPI().info(new Info()
+                .title("API de Controle de Estoque")
+                .description("API REST para cadastro e controle de mercadorias e estoques.")
+                .version("1.0"));
+    }
+}</code></pre>
+        </li>
+        <li><code>@Tag</code> em cada controller, para nomear os grupos <strong>Mercadorias</strong> e <strong>Estoques</strong>.</li>
+      </ol>
+
+      <h2>Como usar na demonstração</h2>
+      <ol class="numerada">
+        <li>Abra <code>POST /mercadorias</code> e clique em <strong>Try it out</strong>.</li>
+        <li>Preencha o JSON, clique em <strong>Execute</strong> e veja o 201.</li>
+        <li>Cadastre um estoque em <code>POST /estoques</code> usando o <code>idMerc</code> criado.</li>
+        <li>Teste os erros: um preço negativo, um <code>idMerc</code> que não existe e a exclusão de uma mercadoria com estoque.</li>
+      </ol>
+    </section>
+
+    <!-- 11. SIMULADOR -->
+    <section id="simulador" class="secao">
+      <h1>Simulador de requisições</h1>
+      <p class="lead">Escolha uma requisição e veja o que o backend devolve. São <strong>exemplos ilustrativos</strong>: esta página não chama o servidor.</p>
+
+      <div class="sim">
+        <div class="sim-lista" id="simLista" role="listbox" aria-label="Requisições de exemplo"></div>
+        <div class="sim-detalhe">
+          <div class="sim-linha">
+            <span class="metodo" id="simMetodo"></span>
+            <code id="simUrl"></code>
+          </div>
+          <p class="sim-desc" id="simDesc"></p>
+          <h4>Corpo enviado</h4>
+          <pre class="codigo" id="simReq"><code></code></pre>
+          <h4>Resposta <span class="status-http" id="simStatus"></span></h4>
+          <pre class="codigo" id="simRes"><code></code></pre>
+          <p class="sim-quem" id="simQuem"></p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="rodape">
+      <button class="botao sec" id="secAnt">&larr; Anterior</button>
+      <button class="botao" id="secProx">Próxima &rarr;</button>
+    </footer>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

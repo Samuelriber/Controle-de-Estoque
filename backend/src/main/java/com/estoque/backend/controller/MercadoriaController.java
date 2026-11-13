@@ -17,8 +17,11 @@ import com.estoque.backend.dto.MercadoriaRequest;
 import com.estoque.backend.dto.MercadoriaResponse;
 import com.estoque.backend.service.MercadoriaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag; // swagger
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+@Tag(name = "Mercadorias", description = "Cadastro e consulta de mercadorias") // swagger
  // contra as pesquisas
 @RestController
 @RequestMapping("/mercadorias")
