@@ -23,8 +23,9 @@ O tema escolhido foi o **Sistema de Controle de Estoque**, com duas entidades in
 7. [Validações e mensagens de erro](#7-validações-e-mensagens-de-erro)
 8. [Como executar](#8-como-executar)
 9. [Documentação interativa (Swagger)](#9-documentação-interativa-swagger)
-10. [Pasta Apresentação](#10-pasta-apresentação)
-11. [Problemas comuns](#11-problemas-comuns)
+10. [Como executar o frontend](#10-como-executar-o-frontend)
+11. [Pasta Apresentação](#11-pasta-apresentação)
+12. [Problemas comuns](#12-problemas-comuns)
 
 ---
 
@@ -39,9 +40,7 @@ O tema escolhido foi o **Sistema de Controle de Estoque**, com duas entidades in
 | Script SQL de criação das tabelas | Pronto (`ScriptBancoPweb.sql`) |
 | Validações e mensagens de resultado | Pronto |
 | Documentação da API (Swagger) | Pronto |
-| **Frontend** (páginas de cadastro, listagem, alteração e exclusão) | **A fazer** |
-
-> O frontend ainda não foi desenvolvido. Enquanto isso, a API pode ser testada pelo Swagger (veja a seção 9).
+| Frontend (páginas de cadastro, listagem, alteração e exclusão) | Pronto (`frontend/`) |
 
 ---
 
@@ -71,6 +70,14 @@ estoque/
 │   ├── index.html
 │   ├── style.css
 │   └── script.js
+├── frontend/                  telas em React + Vite (veja a seção 10)
+│   ├── vite.config.js         proxy de /mercadorias e /estoques para o backend
+│   └── src/
+│       ├── api/               chamadas HTTP para a API REST
+│       ├── pages/             início, listas e formulários
+│       ├── components/        layout, avisos, campos, diálogo de exclusão
+│       ├── lib/               formatação, validação e hooks
+│       └── styles/            tokens.css, base.css, componentes.css
 └── backend/                   projeto Spring Boot
     ├── pom.xml                dependências do projeto
     └── src/main/
@@ -78,7 +85,7 @@ estoque/
         │   └── application.properties     configuração do banco
         └── java/com/estoque/backend/
             ├── BackendApplication.java    ponto de partida da aplicação
-            ├── config/       OpenApiConfig            título e descrição do Swagger
+            ├── config/       OpenApiConfig, CorsConfig   Swagger e liberação do frontend
             ├── controller/   MercadoriaController, EstoqueController
             ├── service/      MercadoriaService, EstoqueService
             ├── repository/   MercadoriaRepository, EstoqueRepository
@@ -350,7 +357,48 @@ Para cadastrar um estoque, crie primeiro uma mercadoria, pois o estoque precisa 
 
 ---
 
-## 10. Pasta Apresentação
+## 10. Como executar o frontend
+
+O frontend fica em `frontend/` e foi feito com **React 18 + Vite**. Ele nunca acessa o banco: toda leitura e gravação passa pela API REST do backend.
+
+### Pré-requisitos
+- **Node.js 18 ou mais novo** (`node -v`)
+- Backend rodando em `http://localhost:8080` (veja a seção 8)
+
+### Comandos
+Dentro da pasta `frontend`:
+
+```bash
+cd frontend
+npm install      # instala as dependências (só na primeira vez)
+npm run dev      # abre o servidor de desenvolvimento em http://localhost:5173
+npm run build    # gera a versão de produção na pasta dist/
+```
+
+### Endereço da API (`VITE_API_URL`)
+- **Desenvolvimento:** deixe `VITE_API_URL` vazio. O Vite encaminha as chamadas de `/mercadorias` e `/estoques` para `http://localhost:8080` (proxy em `vite.config.js`), então não há problema de CORS.
+- **Produção:** copie `.env.example` para `.env` e informe a URL real do backend antes do `npm run build`, por exemplo `VITE_API_URL=https://api.meuestoque.com.br`. A pasta `dist/` pode ser publicada em qualquer hospedagem estática, porque as telas usam rotas com `#` (HashRouter).
+
+### CORS no backend
+Quando o frontend é servido de outra origem, o navegador exige CORS. A classe `backend/src/main/java/com/estoque/backend/config/CorsConfig.java` libera `GET`, `POST`, `PUT` e `DELETE` em `/mercadorias` e `/estoques` para as origens da propriedade `app.cors.allowed-origins` (padrão `http://localhost:5173`). Para liberar outras origens, separe por vírgula:
+
+```properties
+app.cors.allowed-origins=http://localhost:5173,https://meuestoque.com.br
+```
+Ou pela variável de ambiente `APP_CORS_ALLOWED_ORIGINS`.
+
+### Telas
+| Tela | Endereço | O que faz |
+|---|---|---|
+| Início | `#/` | Quantidade de registros de cada cadastro e quantos estoques estão abaixo do mínimo. |
+| Mercadorias | `#/mercadorias` | Lista com id, nome e preço, com ações de editar e excluir. |
+| Nova ou editar mercadoria | `#/mercadorias/nova`, `#/mercadorias/{id}/editar` | Formulário de cadastro e alteração. |
+| Estoques | `#/estoques` | Lista com quantidades, localização e situação (abaixo do mínimo, dentro da faixa, acima do máximo). |
+| Novo ou editar estoque | `#/estoques/novo`, `#/estoques/{id}/editar` | Formulário com a mercadoria escolhida em uma lista. |
+
+---
+
+## 11. Pasta Apresentação
 
 A pasta [`Apresentação`](Apresentação/index.html) tem uma página (HTML, CSS e JavaScript) que explica **cada parte do backend**, feita para apoiar a apresentação em aula.
 
@@ -364,7 +412,7 @@ Ela contém:
 
 ---
 
-## 11. Problemas comuns
+## 12. Problemas comuns
 
 | Problema | Causa e solução |
 |---|---|
@@ -375,6 +423,8 @@ Ela contém:
 | `404` em `/swagger-ui/index.html` | A dependência do springdoc não foi carregada: recarregue o Maven e reinicie o backend. |
 | Getters e setters em vermelho no IntelliJ | Ative o *Annotation Processing* para o Lombok (veja a seção 8). |
 | Erro 409 ao excluir uma mercadoria | Ela ainda tem estoque cadastrado: exclua o estoque primeiro. |
+| Frontend mostra "Não foi possível falar com o servidor" | O backend não está rodando em `localhost:8080`. Suba o backend e clique em "Tentar de novo". |
+| Erro de CORS no console do navegador | O frontend está em uma origem não liberada. Inclua a origem em `app.cors.allowed-origins`. |
 
 ---
 

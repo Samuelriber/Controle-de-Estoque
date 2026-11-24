@@ -1,0 +1,36 @@
+:root {
+  --cor-fundo: #f5f4f0;
+  --cor-superficie: #ffffff;
+  --cor-superficie-suave: #efede7;
+  --cor-linha-hover: #faf9f6;
+  --cor-borda: #d4d1c9;
+  --cor-borda-controle: #8a867c;
+  --cor-texto: #1c1d1b;
+  --cor-texto-suave: #57594f;
+  --cor-destaque: #0b5560;
+  --cor-destaque-escuro: #083f47;
+  --cor-destaque-fundo: #e5efef;
+  --cor-erro: #a8201a;
+  --cor-erro-escuro: #85170f;
+  --cor-erro-fundo: #fbeceb;
+  --cor-sobre-destaque: #ffffff;
+
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2rem;
+  --esp-7: 3rem;
+
+  --raio: 3px;
+  --largura-conteudo: 60rem;
+  --largura-formulario: 30rem;
+
+  --fonte-texto: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fonte-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --fs-pequeno: 0.875rem;
+  --fs-base: 1rem;
+  --fs-medio: 1.25rem;
+  --fs-grande: 1.75rem;
+}
