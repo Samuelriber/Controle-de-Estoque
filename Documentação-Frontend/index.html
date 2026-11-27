@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontend Controle de Estoque</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topo">
+  <button class="btn menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">&#9776;</button>
+  <div class="topo-titulo">
+    <strong>Controle de Estoque</strong>
+    <span>Como funciona o frontend (React + Vite)</span>
+  </div>
+  <div class="espaco"></div>
+  <button class="btn" id="temaBtn" aria-label="Alternar tema claro e escuro">Tema</button>
+</header>
+
+<div class="layout">
+<nav class="menu" id="menu" aria-label="Seções da documentação">
+  <p class="menu-rotulo">Começo</p>
+  <a href="#visao"><span>1</span>Visão geral</a>
+  <a href="#conceitos"><span>2</span>React em 5 minutos</a>
+  <a href="#rodar"><span>3</span>Tecnologias e como rodar</a>
+  <a href="#arvore"><span>4</span>Árvore de diretórios</a>
+  <p class="menu-rotulo">Como funciona (animações)</p>
+  <a href="#inicializacao"><span>5</span>Como a aplicação liga</a>
+  <a href="#rotas"><span>6</span>Rotas e telas</a>
+  <a href="#requisicao"><span>7</span>Conversa com o backend</a>
+  <a href="#carregar"><span>8</span>O hook useCarregar</a>
+  <a href="#cadastro"><span>9</span>Fluxo: cadastrar</a>
+  <a href="#exclusao"><span>10</span>Fluxo: excluir</a>
+  <a href="#validacao"><span>11</span>Validação dos formulários</a>
+  <a href="#situacao"><span>12</span>Situação do estoque</a>
+  <a href="#acessibilidade"><span>13</span>Acessibilidade</a>
+  <a href="#estilos"><span>14</span>Estilos (CSS)</a>
+  <p class="menu-rotulo">Código linha a linha</p>
+  <a href="#cod-config"><span>15</span>Configuração</a>
+  <a href="#cod-entrada"><span>16</span>Entrada e rotas</a>
+  <a href="#cod-api"><span>17</span>Pasta api/</a>
+  <a href="#cod-lib"><span>18</span>Pasta lib/</a>
+  <a href="#cod-componentes"><span>19</span>Pasta components/</a>
+  <a href="#cod-paginas"><span>20</span>Pasta pages/</a>
+  <a href="#cod-estilos"><span>21</span>Pasta styles/</a>
+  <p class="menu-rotulo">Fim</p>
+  <a href="#nova-tela"><span>22</span>Como criar uma tela nova</a>
+  <a href="#glossario"><span>23</span>Glossário</a>
+</nav>
+
+<main class="conteudo" id="conteudo">
+
+<!-- 1 -->
+<section class="secao" id="visao">
+  <p class="chapeu">Visão geral</p>
+  <h2>O que é o frontend deste projeto</h2>
+  <p class="lead">O frontend é a parte do sistema que roda no navegador: as telas, os botões, as tabelas e os formulários. Ele não guarda dados. Toda informação vem do <strong>backend</strong> (Spring Boot + MySQL), e o frontend só pede, mostra e envia.</p>
+  <div class="grade">
+    <div class="cartao"><h4>📦 Mercadorias</h4><p>Lista, cadastra, edita e exclui produtos (nome e preço).</p></div>
+    <div class="cartao"><h4>🏷️ Estoques</h4><p>Liga uma mercadoria a um local, com quantidade atual, mínima e máxima.</p></div>
+    <div class="cartao"><h4>🏠 Início</h4><p>Resumo: quantos registros existem e quantos estoques estão abaixo do mínimo.</p></div>
+    <div class="cartao"><h4>🚫 Página não encontrada</h4><p>Aparece quando o endereço não corresponde a nenhuma tela.</p></div>
+  </div>
+  <p>É uma <strong>SPA</strong> (Single Page Application, aplicação de página única): o navegador carrega um único <code>index.html</code> e, a partir daí, o JavaScript troca o conteúdo da tela sem recarregar a página. Quando você clica em "Mercadorias", nada é baixado de novo; o React só desenha outra tela.</p>
+  <h3>O caminho de um clique, resumido</h3>
+  <pre class="bloco">Você clica num botão
+   └─► a <span class="t-pal">página</span> (pasta pages/) reage ao clique
+         └─► chama uma função da <span class="t-pal">API</span> (pasta api/)
+               └─► http.js faz o <span class="t-pal">fetch</span> para o backend
+                     └─► o backend responde com JSON
+         ◄─── a página guarda a resposta no <span class="t-pal">estado</span> (useState)
+   ◄── o React redesenha a tela com os dados novos</pre>
+  <div class="dica">Este documento tem três partes: <strong>(1)</strong> o básico para se localizar, <strong>(2)</strong> animações interativas mostrando cada mecanismo funcionando e <strong>(3)</strong> todo o código-fonte, arquivo por arquivo, com explicações. Clique numa explicação para destacar as linhas correspondentes no código.</div>
+</section>
+
+<!-- 2 -->
+<section class="secao" id="conceitos">
+  <p class="chapeu">Pré-requisito</p>
+  <h2>React em 5 minutos</h2>
+  <p>Se você nunca viu React, estes são os únicos conceitos usados no projeto.</p>
+
+  <h3>Componente</h3>
+  <p>Um componente é uma <strong>função JavaScript que devolve o que deve aparecer na tela</strong>. O nome começa com letra maiúscula.</p>
+  <pre class="bloco" data-realce="jsx">function Carregando({ texto }) {
+  return &lt;p className="carregando"&gt;{texto}&lt;/p&gt;;
+}
+
+// Usando:  &lt;Carregando texto="Carregando mercadorias..." /&gt;</pre>
+
+  <h3>JSX</h3>
+  <p>O "HTML dentro do JavaScript" acima chama-se JSX. Diferenças que aparecem no projeto: usa-se <code>className</code> no lugar de <code>class</code>, <code>htmlFor</code> no lugar de <code>for</code>, e qualquer coisa entre <code>{ }</code> é JavaScript. Para mostrar algo só às vezes usa-se <code>{condicao &amp;&amp; &lt;Algo /&gt;}</code>; para listas, <code>{lista.map(item =&gt; &lt;tr key={item.id}&gt;...)}</code>.</p>
+
+  <h3>Props</h3>
+  <p>São os "parâmetros" de um componente, passados como atributos: em <code>&lt;Carregando texto="..." /&gt;</code>, <code>texto</code> é uma prop. A prop especial <code>children</code> é o que vai entre a tag de abertura e a de fechamento.</p>
+
+  <h3>Estado: <code>useState</code></h3>
+  <p>Variáveis normais são esquecidas a cada redesenho. O estado é uma memória do componente: quando muda, o React <strong>redesenha a tela sozinho</strong>.</p>
+  <pre class="bloco" data-realce="jsx">const [enviando, setEnviando] = useState(false);  // começa false
+setEnviando(true);   // o React redesenha e o botão vira "Salvando..."</pre>
+
+  <h3>Efeito: <code>useEffect</code></h3>
+  <p>Código que roda <strong>depois</strong> que a tela é desenhada, por exemplo buscar dados ou mudar o título da aba. A lista no final (<code>[titulo]</code>) diz quando rodar de novo: só quando algum desses valores mudar. A função que o efeito devolve é a "limpeza", rodada antes da próxima execução ou quando o componente sai da tela.</p>
+
+  <h3>Referência: <code>useRef</code></h3>
+  <p>Uma caixa que guarda um valor <strong>sem</strong> provocar redesenho. No projeto serve para apontar para elementos reais da página (o <code>&lt;form&gt;</code>, o <code>&lt;dialog&gt;</code>, o <code>&lt;h1&gt;</code>) e poder chamar <code>.focus()</code> ou <code>.showModal()</code> neles.</p>
+
+  <h3>Hook</h3>
+  <p>Toda função que começa com <code>use</code> é um hook. Os do React são <code>useState</code>, <code>useEffect</code>, <code>useRef</code> e <code>useCallback</code>. Os do React Router são <code>useParams</code>, <code>useNavigate</code>, <code>useLocation</code> e <code>useSearchParams</code>. O projeto cria os seus em <code>src/lib/hooks.js</code>: <code>useTitulo</code>, <code>useCarregar</code> e <code>useAviso</code>.</p>
+
+  <h3><code>async</code> / <code>await</code> e Promise</h3>
+  <p>Pedir algo ao servidor demora. Uma <em>Promise</em> é "um valor que vai chegar depois". Dentro de uma função <code>async</code>, <code>await</code> espera esse valor. Se der erro, ele cai no <code>catch</code>.</p>
+  <pre class="bloco" data-realce="js">try {
+  const salva = await criarMercadoria(corpo);  // espera o servidor
+} catch (erro) {
+  // servidor recusou ou está fora do ar
+}</pre>
+</section>
+
+<!-- 3 -->
+<section class="secao" id="rodar">
+  <p class="chapeu">Ferramentas</p>
+  <h2>Tecnologias e como rodar</h2>
+  <div class="rolagem-x"><table class="tabela-doc">
+    <thead><tr><th>Peça</th><th>Para que serve</th></tr></thead>
+    <tbody>
+      <tr><td><strong>React 18</strong></td><td>Biblioteca que monta as telas a partir de componentes.</td></tr>
+      <tr><td><strong>React Router 6</strong></td><td>Decide qual tela mostrar de acordo com o endereço (rotas).</td></tr>
+      <tr><td><strong>Vite 5</strong></td><td>Servidor de desenvolvimento (recarrega ao salvar), proxy para o backend e empacotador para produção.</td></tr>
+      <tr><td><strong>@vitejs/plugin-react</strong></td><td>Ensina o Vite a entender JSX.</td></tr>
+      <tr><td><strong>@fontsource/ibm-plex-*</strong></td><td>As fontes IBM Plex Sans e Mono, instaladas junto do projeto (não dependem do Google Fonts).</td></tr>
+      <tr><td><strong>CSS puro</strong></td><td>Sem framework de CSS. Cores e espaçamentos ficam em variáveis no <code>tokens.css</code>.</td></tr>
+      <tr><td><strong>fetch</strong> (do navegador)</td><td>Faz as chamadas HTTP. Não há axios nem outra biblioteca.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Passo a passo</h3>
+  <ol class="passos-lista">
+    <li>Suba o backend (Spring Boot) em <code>http://localhost:8080</code>, com o MySQL ligado.</li>
+    <li>Entre na pasta <code>frontend</code> e instale as dependências: <code>npm install</code> (cria a pasta <code>node_modules</code>).</li>
+    <li>Rode <code>npm run dev</code>. O Vite abre o servidor em <code>http://localhost:5173</code>.</li>
+    <li>Abra esse endereço no navegador. Pronto.</li>
+  </ol>
+  <pre class="bloco">cd frontend
+npm install
+npm run dev        <span class="t-com"># desenvolvimento: http://localhost:5173</span>
+npm run build      <span class="t-com"># gera a versão final na pasta dist/</span>
+npm run preview    <span class="t-com"># serve a pasta dist/ para conferir o build</span></pre>
+  <div class="dica"><strong>Por que o front não precisa saber o endereço do backend em desenvolvimento?</strong> Porque o Vite funciona como intermediário (proxy): o navegador pede <code>/mercadorias</code> ao próprio Vite (porta 5173), e o Vite repassa para <code>localhost:8080</code>. Em produção, você informa o endereço real em <code>VITE_API_URL</code> num arquivo <code>.env</code>. Veja a animação em <a href="#requisicao">Conversa com o backend</a>.</div>
+</section>
+
+<!-- 4 -->
+<section class="secao" id="arvore">
+  <p class="chapeu">Onde fica cada coisa</p>
+  <h2>Árvore de diretórios</h2>
+  <p>Clique numa pasta para abrir ou fechar e num arquivo para ver o que ele faz. Os itens em cinza não fazem parte do código-fonte (são gerados ou ignorados pelo Git).</p>
+  <div class="arvore-wrap">
+    <div class="arvore" id="arvoreRaiz" role="tree" aria-label="Arquivos do frontend"></div>
+    <div class="cartao arvore-info" id="arvoreInfo" aria-live="polite">
+      <h4>Escolha um arquivo</h4>
+      <p class="texto-2">A descrição aparece aqui.</p>
+    </div>
+  </div>
+  <h3>A regra de organização</h3>
+  <div class="grade">
+    <div class="cartao"><h4>pages/</h4><p>Uma tela inteira por arquivo. Cada uma corresponde a uma rota.</p></div>
+    <div class="cartao"><h4>components/</h4><p>Pedaços reaproveitados por várias telas (campo, alerta, diálogo...).</p></div>
+    <div class="cartao"><h4>api/</h4><p>Única parte que fala com o backend. As telas nunca chamam <code>fetch</code> direto.</p></div>
+    <div class="cartao"><h4>lib/</h4><p>Funções auxiliares sem tela: hooks, validação, formatação, regra de situação.</p></div>
+    <div class="cartao"><h4>styles/</h4><p>O CSS: variáveis (tokens), base e componentes.</p></div>
+  </div>
+  <h3>Quem importa quem</h3>
+  <pre class="bloco">main.jsx ──► App.jsx ──► components/Layout.jsx
+                    └──► pages/*.jsx ──► components/*.jsx
+                                     ├──► api/mercadorias.js ─┐
+                                     ├──► api/estoques.js ────┴──► api/http.js ──► fetch()
+                                     └──► lib/hooks.js, validar.js, formatar.js, situacao.js</pre>
+  <p>As setas sempre apontam "para baixo": páginas usam componentes e funções, mas componentes nunca importam páginas, e <code>api/</code> não sabe nada de telas. Isso deixa cada parte fácil de entender isoladamente.</p>
+</section>
+
+<!-- 5 -->
+<section class="secao" id="inicializacao">
+  <p class="chapeu">Animação</p>
+  <h2>Como a aplicação liga</h2>
+  <p>Do momento em que o navegador abre o endereço até a tabela aparecer na tela. Use os botões ou deixe tocar sozinho.</p>
+  <div class="palco" id="boot">
+    <div class="controles">
+      <button class="btn btn-pri" data-acao="tocar">▶ Tocar</button>
+      <button class="btn" data-acao="ant">◀ Anterior</button>
+      <button class="btn" data-acao="prox">Próximo ▶</button>
+      <button class="btn" data-acao="reiniciar">↺ Reiniciar</button>
+      <span class="contador" aria-live="polite"></span>
+    </div>
+    <div class="cadeia"></div>
+    <div class="duas-col">
+      <div>
+        <div class="passo-texto" aria-live="polite"></div>
+        <pre class="bloco boot-cod"></pre>
+      </div>
+      <div class="nav-falso">
+        <div class="nav-falso-barra"><div class="bolinhas"><i></i><i></i><i></i></div><div class="endereco boot-end"></div></div>
+        <div class="nav-falso-corpo boot-tela"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="secao" id="rotas">
+  <p class="chapeu">Animação</p>
+  <h2>Rotas: como o endereço escolhe a tela</h2>
+  <p>O projeto usa <code>HashRouter</code>. O caminho da tela fica <strong>depois do <code>#</code></strong> no endereço, por exemplo <code>localhost:5173/#/mercadorias</code>. Tudo depois do <code>#</code> nunca é enviado ao servidor, então qualquer servidor simples consegue hospedar o build sem configuração especial.</p>
+  <div class="rolagem-x"><table class="tabela-doc">
+    <thead><tr><th>Endereço</th><th>Tela (componente)</th></tr></thead>
+    <tbody>
+      <tr><td><code>#/</code></td><td>Inicio</td></tr>
+      <tr><td><code>#/mercadorias</code></td><td>MercadoriasLista</td></tr>
+      <tr><td><code>#/mercadorias/nova</code></td><td>MercadoriaForm (cadastro)</td></tr>
+      <tr><td><code>#/mercadorias/:id/editar</code></td><td>MercadoriaForm (edição), só se o id for número</td></tr>
+      <tr><td><code>#/estoques</code></td><td>EstoquesLista (aceita <code>?situacao=abaixo</code>)</td></tr>
+      <tr><td><code>#/estoques/novo</code></td><td>EstoqueForm (cadastro)</td></tr>
+      <tr><td><code>#/estoques/:id/editar</code></td><td>EstoqueForm (edição), só se o id for número</td></tr>
+      <tr><td>qualquer outro</td><td>NaoEncontrada</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Simulador</h3>
+  <p>Escolha ou digite um endereço e veja o React Router percorrer as rotas.</p>
+  <div class="palco" id="rotasSim">
+    <div class="urls"></div>
+    <form class="form-url"><input type="text" aria-label="Endereço depois do #" value="/mercadorias/7/editar"><button class="btn btn-pri" type="submit">Ir</button></form>
+    <div class="duas-col">
+      <div class="arv-comp" aria-live="polite"></div>
+      <div class="nav-falso">
+        <div class="nav-falso-barra"><div class="bolinhas"><i></i><i></i><i></i></div><div class="endereco rota-end"></div></div>
+        <div class="nav-falso-corpo rota-tela"></div>
+      </div>
+    </div>
+    <div class="rota-expl" style="margin-top:12px"></div>
+  </div>
+  <div class="dica"><strong>O que é <code>:id</code>?</strong> É um parâmetro: a parte da URL naquela posição vira uma variável. Dentro do formulário, <code>const { id } = useParams()</code> devolve <code>"7"</code> para <code>#/mercadorias/7/editar</code>. Se <code>id</code> existe, o formulário está em modo edição; se não existe (rota <code>/nova</code>), está em modo cadastro. É assim que <strong>um único componente</strong> serve para as duas coisas.</div>
+</section>
+
+<!-- 7 -->
+<section class="secao" id="requisicao">
+  <p class="chapeu">Animação</p>
+  <h2>Conversa com o backend</h2>
+  <p>Toda comunicação passa por 3 camadas no frontend: a <strong>página</strong> chama uma função de <code>api/mercadorias.js</code> ou <code>api/estoques.js</code>, que chama <code>requisitar()</code> em <code>api/http.js</code>, que faz o <code>fetch</code>. Em desenvolvimento, o <strong>proxy do Vite</strong> repassa a chamada para o Spring. Escolha um cenário:</p>
+  <div class="palco" id="req">
+    <div class="cenarios"></div>
+    <div class="controles">
+      <button class="btn btn-pri" data-acao="tocar">▶ Tocar</button>
+      <button class="btn" data-acao="ant">◀</button>
+      <button class="btn" data-acao="prox">▶</button>
+      <span class="contador" aria-live="polite"></span>
+    </div>
+    <div class="pista">
+      <div class="no"><b>Página</b><small>pages/*.jsx</small></div>
+      <div class="no"><b>Função da API</b><small>api/mercadorias.js</small></div>
+      <div class="no"><b>requisitar()</b><small>api/http.js</small></div>
+      <div class="no"><b>Proxy Vite</b><small>localhost:5173</small></div>
+      <div class="no"><b>Backend</b><small>localhost:8080</small></div>
+      <div class="pacote">GET</div>
+    </div>
+    <div class="diario" aria-live="polite"></div>
+    <div class="resultado"></div>
+  </div>
+  <h3>Por que existe a classe <code>ErroApi</code>?</h3>
+  <p>Erros chegam de jeitos diferentes: o servidor pode estar desligado, recusar dados, não encontrar o registro... <code>requisitar()</code> transforma tudo num único formato, e as telas só precisam olhar três coisas:</p>
+  <div class="rolagem-x"><table class="tabela-doc">
+    <thead><tr><th>Propriedade</th><th>Significado</th><th>Quem usa</th></tr></thead>
+    <tbody>
+      <tr><td><code>erro.mensagem</code></td><td>Texto pronto para mostrar ao usuário.</td><td>Alerta, EstadoErro</td></tr>
+      <tr><td><code>erro.status</code></td><td>Código HTTP (404, 400, 409...). <strong>0</strong> quando o servidor nem respondeu.</td><td>EstadoErro esconde "Tentar de novo" no 404; as listas recarregam no 404 ao excluir.</td></tr>
+      <tr><td><code>erro.campos</code></td><td>Erros por campo enviados pelo backend, ex. <code>{ nome: 'O nome é obrigatório' }</code>.</td><td>Formulários mostram cada erro embaixo do campo certo.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 8 -->
+<section class="secao" id="carregar">
+  <p class="chapeu">Animação</p>
+  <h2>O hook <code>useCarregar</code>: carregando, pronto ou erro</h2>
+  <p>Todas as telas que buscam dados usam <code>useCarregar</code>. Ele guarda um <strong>status</strong> que só pode ter três valores, e a tela decide o que desenhar conforme esse status. Clique nos botões para simular o que acontece.</p>
+  <div class="palco" id="maq">
+    <div class="controles">
+      <button class="btn btn-pri" data-acao="montar">Abrir a tela</button>
+      <button class="btn" data-acao="ok">Servidor responde OK</button>
+      <button class="btn" data-acao="falha">Servidor falha</button>
+      <button class="btn" data-acao="recarregar">Botão "Tentar de novo"</button>
+      <button class="btn" data-acao="sair">Sair da tela antes da resposta</button>
+    </div>
+    <div class="maquina">
+      <div class="estados">
+        <svg viewBox="0 0 420 230" role="img" aria-label="Diagrama de estados: carregando, pronto e erro">
+          <defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="stroke:none;fill:var(--texto-2)"/></marker></defs>
+          <path id="ar-ok" d="M150,70 C210,40 250,40 290,55" marker-end="url(#pt)"/>
+          <path id="ar-falha" d="M150,95 C210,150 250,170 290,175" marker-end="url(#pt)"/>
+          <path id="ar-rec" d="M290,190 C200,225 110,200 90,110" marker-end="url(#pt)"/>
+          <text class="rot" x="222" y="38">.then(dados)</text>
+          <text class="rot" x="200" y="148">.then(_, erro)</text>
+          <text class="rot" x="165" y="222">recarregar()</text>
+          <g class="est carregando" id="est-carregando"><rect x="20" y="58" width="130" height="48" rx="10"/><text x="85" y="87">carregando</text></g>
+          <g class="est pronto" id="est-pronto"><rect x="290" y="30" width="110" height="48" rx="10"/><text x="345" y="59">pronto</text></g>
+          <g class="est erro" id="est-erro"><rect x="290" y="155" width="110" height="48" rx="10"/><text x="345" y="184">erro</text></g>
+        </svg>
+      </div>
+      <div>
+        <div class="cartao vars" id="maqVars"></div>
+        <div class="nav-falso" style="margin-top:10px"><div class="nav-falso-corpo maq-tela" style="min-height:120px"></div></div>
+      </div>
+    </div>
+    <div class="diario" id="maqLog" style="margin-top:12px" aria-live="polite"></div>
+  </div>
+  <div class="dica"><strong>Para que serve a variável <code>ativo</code>?</strong> Se você sai da tela antes do servidor responder, a resposta ainda chega. Sem o <code>ativo</code>, o hook tentaria atualizar uma tela que não existe mais (ou, pior, mostrar dados velhos numa tela nova). A função de limpeza do <code>useEffect</code> põe <code>ativo = false</code>, e a resposta atrasada é ignorada. Teste com o botão "Sair da tela antes da resposta".</div>
+</section>
+
+<!-- 9 -->
+<section class="secao" id="cadastro">
+  <p class="chapeu">Animação</p>
+  <h2>Fluxo completo: cadastrar uma mercadoria</h2>
+  <p>Acompanhe tudo o que acontece no código, do clique em "Nova mercadoria" até o aviso verde na lista.</p>
+  <div class="palco" id="story">
+    <div class="controles">
+      <button class="btn btn-pri" data-acao="tocar">▶ Tocar</button>
+      <button class="btn" data-acao="ant">◀ Anterior</button>
+      <button class="btn" data-acao="prox">Próximo ▶</button>
+      <button class="btn" data-acao="reiniciar">↺ Reiniciar</button>
+      <span class="contador" aria-live="polite"></span>
+    </div>
+    <div class="duas-col">
+      <div>
+        <div class="passo-texto" aria-live="polite"></div>
+        <pre class="bloco story-cod"></pre>
+      </div>
+      <div class="nav-falso">
+        <div class="nav-falso-barra"><div class="bolinhas"><i></i><i></i><i></i></div><div class="endereco story-end"></div></div>
+        <div class="nav-falso-corpo story-tela"></div>
+      </div>
+    </div>
+  </div>
+  <div class="alerta-doc"><strong>Validação dupla.</strong> O frontend valida antes de enviar (resposta instantânea para o usuário), e o backend valida de novo (o servidor nunca confia no navegador). Se o backend recusar, os erros dele chegam em <code>erro.campos</code> e aparecem nos mesmos lugares.</div>
+</section>
+
+<!-- 10 -->
+<section class="secao" id="exclusao">
+  <p class="chapeu">Demonstração interativa</p>
+  <h2>Fluxo: excluir com confirmação</h2>
+  <p>Esta mini-tela funciona como a real: clique em <strong>Excluir</strong> numa linha. O diálogo usa o elemento nativo <code>&lt;dialog&gt;</code> com <code>showModal()</code>, igual ao componente <code>ConfirmarExclusao</code>. Ao lado, você vê o estado da página mudando.</p>
+  <div class="duas-col">
+    <div class="nav-falso">
+      <div class="nav-falso-barra"><div class="bolinhas"><i></i><i></i><i></i></div><div class="endereco">localhost:5173/<span class="hash">#/mercadorias</span></div></div>
+      <div class="nav-falso-corpo" id="excTela"></div>
+    </div>
+    <div>
+      <div class="cartao vars" id="excVars"></div>
+      <div class="diario" id="excLog" style="margin-top:10px" aria-live="polite"></div>
+      <button class="btn" id="excRestaurar" style="margin-top:8px">↺ Restaurar linhas</button>
+    </div>
+  </div>
+  <dialog class="dlg" id="excDlg" aria-labelledby="excDlgT" aria-describedby="excDlgM">
+    <h5 id="excDlgT">Excluir mercadoria</h5>
+    <p id="excDlgM"></p>
+    <div class="acoes"><button type="button" id="excCancelar">Cancelar</button><button type="button" class="perigo" id="excConfirmar">Excluir</button></div>
+  </dialog>
+  <h3>O que o código faz em cada momento</h3>
+  <ol class="passos-lista">
+    <li>O botão Excluir faz <code>setAlvo(mercadoria)</code>. Guardar o item inteiro (não só o id) permite mostrar o nome na mensagem.</li>
+    <li><code>ConfirmarExclusao</code> recebe <code>aberto={Boolean(alvo)}</code>. Seu <code>useEffect</code> percebe que virou <code>true</code>, chama <code>dialogo.showModal()</code> e põe o foco em <strong>Cancelar</strong> (o botão seguro).</li>
+    <li>Confirmar chama <code>confirmarExclusao()</code>: <code>setExcluindo(true)</code> desabilita os botões e mostra "Excluindo...".</li>
+    <li>Com sucesso (204), em vez de buscar a lista de novo, <code>lista.alterarDados(...)</code> filtra a linha para fora da lista que já está na memória. Mais rápido.</li>
+    <li>O aviso verde aparece, o foco volta ao título <code>&lt;h1&gt;</code>, e no <code>finally</code> <code>setAlvo(null)</code> fecha o diálogo.</li>
+    <li>Se der erro 404 (alguém já tinha excluído), a lista é recarregada do servidor para ficar certa.</li>
+  </ol>
+</section>
+
+<!-- 11 -->
+<section class="secao" id="validacao">
+  <p class="chapeu">Teste você mesmo</p>
+  <h2>Validação dos formulários</h2>
+  <p>As funções abaixo são <strong>cópias exatas</strong> de <code>src/lib/validar.js</code> rodando nesta página. Digite valores e clique em Salvar. Os campos ficam guardados como <strong>texto</strong> enquanto você digita (é assim que os inputs funcionam) e só viram número no momento de enviar.</p>
+  <div class="palco">
+    <div class="abas" role="tablist">
+      <button class="btn" role="tab" aria-selected="true" data-aba="merc">Mercadoria</button>
+      <button class="btn" role="tab" aria-selected="false" data-aba="est">Estoque</button>
+    </div>
+    <div class="play">
+      <form id="valForm" novalidate></form>
+      <div>
+        <p style="margin-top:0"><strong>Objeto <code>erros</code> devolvido:</strong></p>
+        <pre class="bloco" id="valErros">{}</pre>
+        <p><strong>Corpo que seria enviado ao backend:</strong></p>
+        <pre class="bloco" id="valCorpo">(clique em Salvar)</pre>
+      </div>
+    </div>
+  </div>
+  <h3>Regras</h3>
+  <div class="rolagem-x"><table class="tabela-doc">
+    <thead><tr><th>Campo</th><th>Regra</th></tr></thead>
+    <tbody>
+      <tr><td>Nome, Localização</td><td>Obrigatório; no máximo 100 caracteres (espaços nas pontas são ignorados).</td></tr>
+      <tr><td>Preço</td><td>Obrigatório; não negativo; só números com vírgula ou ponto; até 8 dígitos inteiros e 2 decimais.</td></tr>
+      <tr><td>Quantidades</td><td>Obrigatórias; inteiras; não negativas; até 2.147.483.647 (maior <code>int</code> do Java).</td></tr>
+      <tr><td>Máxima × mínima</td><td>A máxima não pode ser menor que a mínima (só checado quando as duas são válidas).</td></tr>
+      <tr><td>Mercadoria (estoque)</td><td>Precisa estar selecionada.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Ao digitar num campo com erro, o erro daquele campo some na hora (função <code>alterar</code>). Ao salvar com erros, o foco vai para o primeiro campo inválido (<code>focarPrimeiroInvalido</code>).</p>
+</section>
+
+<!-- 12 -->
+<section class="secao" id="situacao">
+  <p class="chapeu">Teste você mesmo</p>
+  <h2>Situação do estoque e formatação</h2>
+  <p>A coluna "Situação" da lista de estoques e o aviso da tela inicial vêm de uma função de 4 linhas em <code>src/lib/situacao.js</code>. Mexa nos valores:</p>
+  <div class="palco">
+    <div class="entradas">
+      <label>Quantidade <input type="range" id="sQtd" min="0" max="120" value="8"></label>
+      <label>Mínima <input type="number" id="sMin" min="0" value="10"></label>
+      <label>Máxima <input type="number" id="sMax" min="0" value="80"></label>
+    </div>
+    <div class="regua" aria-hidden="true">
+      <div class="trilho"></div><div class="faixa" id="sFaixa"></div>
+      <div class="marca" id="sMarcaMin"><span>mín</span></div><div class="marca" id="sMarcaMax"><span>máx</span></div>
+      <div class="caixa" id="sCaixa">📦<span id="sCaixaN"></span></div>
+    </div>
+    <p><code id="sChamada"></code> → <span class="selo" id="sSelo" aria-live="polite"></span></p>
+  </div>
+  <h3>Formatação (lib/formatar.js)</h3>
+  <p>Números são mostrados no padrão brasileiro com <code>Intl.NumberFormat('pt-BR')</code>, recurso nativo do navegador:</p>
+  <div class="palco">
+    <div class="entradas">
+      <label>Valor <input type="text" id="fValor" value="1234.5"></label>
+    </div>
+    <pre class="bloco" id="fSaida" aria-live="polite"></pre>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="secao" id="acessibilidade">
+  <p class="chapeu">Cuidado extra</p>
+  <h2>Acessibilidade</h2>
+  <p>O projeto foi feito para funcionar também com teclado e leitor de tela (software que lê a página em voz alta para pessoas cegas). Muito código que parece "estranho" à primeira vista existe por isso:</p>
+  <div class="rolagem-x"><table class="tabela-doc">
+    <thead><tr><th>Recurso</th><th>Onde</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td>Link "Pular para o conteúdo"</td><td>Layout.jsx + <code>.pular</code></td><td>Fica escondido acima da tela e aparece ao apertar Tab. Evita passar pelo menu toda vez.</td></tr>
+      <tr><td>Foco no <code>&lt;h1&gt;</code> ao trocar de tela</td><td>Layout.jsx</td><td>Numa SPA a página não recarrega, então o leitor de tela não perceberia a troca. Focar o título faz ele anunciar a tela nova. Por isso todo <code>h1</code> tem <code>tabIndex={-1}</code>.</td></tr>
+      <tr><td><code>aria-invalid</code> e <code>aria-describedby</code></td><td>Campo.jsx</td><td>Liga a dica e o erro ao campo: o leitor lê "Preço, inválido, Informe o preço só com números".</td></tr>
+      <tr><td><code>role="status"</code> e <code>role="alert"</code></td><td>Alerta.jsx, Carregando.jsx, EstadoErro.jsx</td><td>Regiões "ao vivo": o leitor anuncia o texto que aparece nelas sem o usuário precisar ir até lá. O atraso de 60 ms no Alerta garante que a região já exista antes do texto entrar.</td></tr>
+      <tr><td><code>&lt;dialog&gt;</code> com <code>showModal()</code></td><td>ConfirmarExclusao.jsx</td><td>O navegador prende o foco no diálogo e fecha com Esc. O foco começa em Cancelar.</td></tr>
+      <tr><td><code>aria-label</code> nos botões da tabela</td><td>Listas</td><td>Vários botões "Editar" iguais seriam confusos; o leitor ouve "Editar Arroz 5kg".</td></tr>
+      <tr><td><code>&lt;caption&gt;</code>, <code>scope="col"</code>, <code>scope="row"</code></td><td>Tabelas</td><td>Dão nome à tabela e ligam cada célula ao seu cabeçalho.</td></tr>
+      <tr><td><code>aria-busy</code></td><td>Inicio.jsx</td><td>Avisa que a tabela ainda está carregando.</td></tr>
+      <tr><td><code>.visualmente-oculto</code></td><td>base.css</td><td>Esconde da vista mas mantém para o leitor de tela (ex.: a <code>legend</code> do formulário de estoque).</td></tr>
+      <tr><td><code>:focus-visible</code></td><td>base.css</td><td>Contorno visível em quem está navegando por teclado.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 14 -->
+<section class="secao" id="estilos">
+  <p class="chapeu">Visual</p>
+  <h2>Estilos (CSS)</h2>
+  <p>São três arquivos importados em ordem pelo <code>main.jsx</code>. A ordem importa: quem vem depois pode usar o que veio antes.</p>
+  <ol class="passos-lista">
+    <li><strong>tokens.css</strong>: só variáveis (<code>--cor-destaque</code>, <code>--esp-4</code>...). Mudar uma cor aqui muda o sistema inteiro.</li>
+    <li><strong>base.css</strong>: aparência padrão das tags (<code>body</code>, <code>h1</code>, <code>a</code>, foco) e utilitários.</li>
+    <li><strong>componentes.css</strong>: as classes usadas nos componentes (<code>.botao</code>, <code>.tabela</code>, <code>.alerta</code>, <code>.campo</code>...).</li>
+  </ol>
+  <h3>Cores do sistema (lidas do tokens.css)</h3>
+  <div class="amostras" id="amostras"></div>
+  <h3>Escala de espaçamento</h3>
+  <div id="espacos"></div>
+  <div class="dica">Para usar uma variável: <code>padding: var(--esp-4);</code>. Os nomes das classes seguem um padrão simples: <code>.botao</code> é o básico e <code>.botao-principal</code>, <code>.botao-perigo</code>, <code>.botao-pequeno</code> são variações que se somam: <code>className="botao botao-pequeno botao-perigo"</code>.</div>
+</section>
+
+<!-- 15+ código -->
+<section class="secao" id="cod-config">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Configuração do projeto</h2>
+  <p>Arquivos na raiz da pasta <code>frontend/</code>. Clique nas explicações para destacar as linhas.</p>
+
+  <div class="arquivo" data-arquivo="package.json" data-resumo="Ficha do projeto para o npm: nome, comandos e dependências.">
+    <ol class="passeio-notas">
+      <li data-linhas="2-4">Nome interno do projeto. <code>private: true</code> impede publicar no npm por engano.</li>
+      <li data-linhas="5"><code>"type": "module"</code> faz o Node entender <code>import</code>/<code>export</code> (sintaxe moderna) nos arquivos <code>.js</code>, como o <code>vite.config.js</code>.</li>
+      <li data-linhas="6-10">Os comandos de <code>npm run ...</code>: <code>dev</code> liga o servidor de desenvolvimento, <code>build</code> gera a versão final em <code>dist/</code>, <code>preview</code> serve essa versão para teste.</li>
+      <li data-linhas="11-17">Bibliotecas usadas pelo código que vai para o navegador: React, React DOM (que desenha no HTML), React Router e as fontes. O <code>^</code> aceita atualizações menores (ex.: 18.3.1 → 18.4.0).</li>
+      <li data-linhas="18-21">Ferramentas usadas só durante o desenvolvimento: o Vite e o plugin que entende JSX.</li>
+    </ol>
+  </div>
+
+  <div class="arquivo" data-arquivo="vite.config.js" data-resumo="Configura o Vite: plugin do React, porta 5173 e o proxy que repassa as chamadas para o backend.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-2">Importa a função de configuração do Vite e o plugin do React.</li>
+      <li data-linhas="4">Endereço do backend Spring em desenvolvimento.</li>
+      <li data-linhas="6-8">Antes de repassar, remove o cabeçalho <code>Origin</code>. Assim o Spring enxerga a chamada como "da mesma origem" e o CORS não bloqueia, mesmo se você abrir o front por <code>127.0.0.1:5173</code> em vez de <code>localhost</code>.</li>
+      <li data-linhas="10-16">Se o backend estiver desligado, o proxy daria um erro feio. Aqui ele responde <code>502</code> com o texto "Backend indisponível". O <code>http.js</code> reconhece esse 502 sem JSON e mostra a mensagem amigável "Não foi possível falar com o servidor".</li>
+      <li data-linhas="19"><code>changeOrigin: true</code> ajusta o cabeçalho <code>Host</code> para o do backend. <code>configure</code> liga as duas regras acima.</li>
+      <li data-linhas="21-30">A configuração em si: usa o plugin do React, abre na porta 5173 e manda para o backend tudo que começar com <code>/mercadorias</code> ou <code>/estoques</code>. O resto (HTML, JS, CSS) o próprio Vite entrega.</li>
+    </ol>
+  </div>
+
+  <div class="arquivo" data-arquivo=".env.example" data-resumo="Modelo de variáveis de ambiente. Copie para .env e preencha quando for publicar.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-5">Explica a variável: vazia em desenvolvimento (o proxy resolve), com a URL do backend em produção. Também lembra de liberar essa origem no CORS do backend.</li>
+      <li data-linhas="6">O Vite só expõe ao código do navegador variáveis que começam com <code>VITE_</code>. No código ela é lida como <code>import.meta.env.VITE_API_URL</code> (veja <code>http.js</code>). O arquivo <code>.env</code> real fica fora do Git (<code>.gitignore</code>).</li>
+    </ol>
+  </div>
+
+  <div class="arquivo" data-arquivo="index.html" data-resumo="A única página HTML do sistema. Quase vazia: o React preenche tudo.">
+    <ol class="passeio-notas">
+      <li data-linhas="2"><code>lang="pt-BR"</code>: informa o idioma (leitores de tela pronunciam certo, o navegador não oferece tradução).</li>
+      <li data-linhas="4-7">Codificação, ajuste para celular (<code>viewport</code>), descrição e título inicial da aba. O título depois é trocado por <code>useTitulo</code> em cada tela.</li>
+      <li data-linhas="10">A <code>div</code> vazia onde o React vai desenhar toda a aplicação. O id <code>raiz</code> é procurado pelo <code>main.jsx</code>.</li>
+      <li data-linhas="11">Carrega o ponto de entrada do JavaScript. <code>type="module"</code> permite <code>import</code>. No build, o Vite troca isso pelo arquivo final empacotado.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-entrada">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Entrada e rotas</h2>
+  <div class="arquivo" data-arquivo="src/main.jsx" data-resumo="Ponto de partida: carrega fontes e CSS e coloca o App dentro da div#raiz.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-2"><code>StrictMode</code> é um modo de verificação do React (só em desenvolvimento): roda efeitos duas vezes para revelar bugs. <code>createRoot</code> liga o React a um elemento HTML.</li>
+      <li data-linhas="3-5">Importa as fontes IBM Plex (pesos 400 e 600, só caracteres latinos para ficar leve). Importar um CSS num arquivo JS é um recurso do Vite: ele injeta o estilo na página.</li>
+      <li data-linhas="6-8">Os três arquivos de estilo, nesta ordem: variáveis, base e componentes.</li>
+      <li data-linhas="9">Importa o componente principal.</li>
+      <li data-linhas="11-15">Encontra <code>&lt;div id="raiz"&gt;</code> e desenha <code>&lt;App /&gt;</code> dentro dela. A partir daqui o React controla a página.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/App.jsx" data-resumo="Mapa de rotas: qual endereço mostra qual tela.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-8">Importa as peças do React Router, o Layout e todas as páginas.</li>
+      <li data-linhas="10-14"><code>ComIdNumerico</code> é um "porteiro": lê o <code>:id</code> da URL e só mostra o formulário (<code>children</code>) se for composto só de dígitos. Senão mostra "Página não encontrada". Evita mandar <code>/mercadorias/abc</code> para o backend.</li>
+      <li data-linhas="18"><code>HashRouter</code> usa a parte depois do <code>#</code> como caminho.</li>
+      <li data-linhas="20">Rota sem <code>path</code> com <code>element={&lt;Layout /&gt;}</code>: é uma "moldura". Todas as rotas de dentro aparecem no lugar do <code>&lt;Outlet /&gt;</code> do Layout, então cabeçalho e menu ficam sempre visíveis.</li>
+      <li data-linhas="21"><code>index</code> = a rota do endereço raiz <code>#/</code>.</li>
+      <li data-linhas="22-27">As rotas das telas. Note que <code>MercadoriaForm</code> e <code>EstoqueForm</code> aparecem duas vezes: cadastro (sem id) e edição (com id).</li>
+      <li data-linhas="28"><code>path="*"</code> pega qualquer endereço que não casou com nenhuma rota acima.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-api">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Pasta <code>api/</code></h2>
+  <div class="arquivo" data-arquivo="src/api/http.js" data-resumo="O único lugar que chama fetch. Monta a requisição, lê a resposta e transforma qualquer falha em ErroApi.">
+    <ol class="passeio-notas">
+      <li data-linhas="1">Lê <code>VITE_API_URL</code>. O <code>?? ''</code> usa texto vazio se não existir, e o <code>replace(/\/$/, '')</code> remove uma barra no final (evita <code>//mercadorias</code>).</li>
+      <li data-linhas="2">Só para a mensagem de erro: mostra o endereço sem <code>http://</code>, ou <code>localhost:8080</code> se a variável estiver vazia.</li>
+      <li data-linhas="4-5">A mensagem mostrada quando o servidor não responde.</li>
+      <li data-linhas="7-13"><code>ErroApi</code> é um tipo de erro próprio que herda de <code>Error</code> e carrega <code>status</code>, <code>mensagem</code> e <code>campos</code>. Se <code>campos</code> vier vazio (<code>{}</code>), vira <code>null</code>, para que <code>if (erro.campos)</code> funcione.</li>
+      <li data-linhas="15-17">Atalho: <code>erro.rede</code> é <code>true</code> quando o status é 0 (servidor inalcançável). <code>get</code> faz parecer uma propriedade.</li>
+      <li data-linhas="20-28"><code>lerJson</code> tenta ler o corpo como JSON, mas só se o servidor disse que é JSON (<code>Content-Type</code>). Se não for ou estiver quebrado, devolve <code>null</code> em vez de explodir.</li>
+      <li data-linhas="30">A função principal. Recebe o caminho e, opcionalmente, o método (padrão <code>GET</code>) e o corpo. Todas as funções de <code>mercadorias.js</code> e <code>estoques.js</code> a usam.</li>
+      <li data-linhas="31-37">Faz a chamada. Só envia <code>Content-Type: application/json</code> e o corpo se houver corpo. <code>JSON.stringify</code> transforma o objeto JS em texto JSON.</li>
+      <li data-linhas="38-40">O <code>fetch</code> só lança exceção quando não conseguiu nem conversar com o servidor (sem rede, endereço errado, CORS). Isso vira <code>ErroApi</code> com status 0.</li>
+      <li data-linhas="42"><code>204 No Content</code>: sucesso sem corpo (é o que o DELETE devolve). Retorna <code>null</code>.</li>
+      <li data-linhas="44-45">Lê o JSON. Se o status for 2xx (<code>resposta.ok</code>), devolve os dados para quem chamou.</li>
+      <li data-linhas="47-50">502/503/504 sem JSON = o proxy ou um gateway respondeu no lugar do backend (ex.: backend desligado). Tratado igual a erro de rede.</li>
+      <li data-linhas="52-56">Qualquer outro erro (400, 404, 409, 500...): usa a <code>mensagem</code> e os <code>campos</code> que o backend mandou, ou uma mensagem genérica com o código.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/api/mercadorias.js" data-resumo="Cinco funções, uma para cada operação do CRUD de mercadorias.">
+    <ol class="passeio-notas">
+      <li data-linhas="1">Usa o <code>requisitar</code> do http.js.</li>
+      <li data-linhas="3"><code>GET /mercadorias</code>: lista todas.</li>
+      <li data-linhas="4"><code>GET /mercadorias/5</code>: busca uma. As crases (<code>`</code>) permitem colocar variáveis com <code>${}</code> no texto.</li>
+      <li data-linhas="5"><code>POST /mercadorias</code> com os dados no corpo: cria.</li>
+      <li data-linhas="6-7"><code>PUT /mercadorias/5</code>: substitui os dados de uma existente.</li>
+      <li data-linhas="8"><code>DELETE /mercadorias/5</code>: exclui.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/api/estoques.js" data-resumo="Mesma ideia, para /estoques.">
+    <ol class="passeio-notas">
+      <li data-linhas="3-8">Idêntico ao de mercadorias, trocando o caminho. Cada função é uma <em>arrow function</em> de uma linha: <code>(id) =&gt; requisitar(...)</code> devolve diretamente a Promise do <code>requisitar</code>.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-lib">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Pasta <code>lib/</code></h2>
+  <div class="arquivo" data-arquivo="src/lib/hooks.js" data-resumo="Três hooks próprios usados pelas páginas.">
+    <ol class="passeio-notas">
+      <li data-linhas="4-8"><code>useTitulo('Mercadorias')</code> muda o texto da aba para "Mercadorias | Controle de Estoque". Roda de novo só se o título mudar.</li>
+      <li data-linhas="10-11"><code>useCarregar(funcao, chave)</code>: chama a função de carregamento quando a tela abre e sempre que <code>chave</code> mudar (os formulários passam o <code>id</code>, então ir de "editar 5" para "editar 6" recarrega).</li>
+      <li data-linhas="12-13">Guarda a função numa ref e atualiza a cada redesenho. Assim o efeito sempre usa a versão mais nova da função sem precisar colocá-la nas dependências (o que faria recarregar a cada redesenho).</li>
+      <li data-linhas="14"><code>tentativa</code> é um contador. Somar 1 nele força o efeito a rodar de novo: é assim que "Tentar de novo" funciona.</li>
+      <li data-linhas="15">O estado começa como "carregando".</li>
+      <li data-linhas="17-23">O efeito: marca <code>ativo = true</code>, volta para "carregando", chama a função e, quando a Promise terminar, grava "pronto" com os dados ou "erro" com o erro. O <code>ativo &amp;&amp;</code> só deixa gravar se a tela ainda for a mesma.</li>
+      <li data-linhas="24-27">A limpeza põe <code>ativo = false</code>. Ela roda quando a tela fecha ou antes de recarregar. As dependências <code>[chave, tentativa]</code> definem quando recarregar.</li>
+      <li data-linhas="29"><code>recarregar()</code> soma 1 na tentativa. <code>useCallback</code> mantém a mesma função entre redesenhos.</li>
+      <li data-linhas="30-33"><code>alterarDados(fn)</code> muda os dados já carregados sem ir ao servidor. As listas usam para remover a linha excluída.</li>
+      <li data-linhas="35">Devolve tudo junto: <code>{ status, dados, erro, recarregar, alterarDados }</code>.</li>
+      <li data-linhas="38-42"><code>useAviso</code> lê um aviso deixado pela tela anterior. O formulário navega com <code>navigate('/mercadorias', { state: { aviso } })</code> e a lista o recebe em <code>location.state.aviso</code>.</li>
+      <li data-linhas="44-49">Depois de ler, substitui a entrada do histórico por uma sem <code>state</code>. Assim, se o usuário apertar F5 ou voltar, o "Mercadoria cadastrada" não reaparece. O <code>[]</code> faz rodar só uma vez, na abertura da tela.</li>
+      <li data-linhas="51">Devolve <code>[aviso, setAviso]</code>, igual ao <code>useState</code>, para a página também poder trocar o aviso (ex.: depois de excluir).</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/lib/validar.js" data-resumo="Regras de validação dos formulários, iguais às do backend.">
+    <ol class="passeio-notas">
+      <li data-linhas="1">Maior número que cabe num <code>int</code> do Java. Acima disso o backend não aceitaria.</li>
+      <li data-linhas="3"><code>lerPreco("25,90")</code> → <code>25.9</code>. Troca a vírgula por ponto antes de converter.</li>
+      <li data-linhas="5-10">Valida texto: obrigatório e até 100 caracteres. Devolve a mensagem de erro, ou <code>null</code> se estiver ok.</li>
+      <li data-linhas="12-19">Valida inteiro em etapas, cada uma com sua mensagem: vazio → negativo (<code>/^-\d/</code> = começa com menos e número) → não inteiro (<code>/^\d+$/</code> = só dígitos) → grande demais.</li>
+      <li data-linhas="21-23"><code>semVazios</code> remove do objeto as chaves cujo valor é <code>null</code>. Resultado: <code>{}</code> quando tudo está certo, então <code>Object.keys(erros).length</code> diz quantos erros há.</li>
+      <li data-linhas="25-32">Preço: obrigatório; não negativo; formato <code>números[,números]</code>; e no máximo 8 dígitos antes e 2 depois da vírgula (mesmo limite da coluna <code>DECIMAL(10,2)</code> do banco).</li>
+      <li data-linhas="34-37">Monta o objeto de erros da mercadoria.</li>
+      <li data-linhas="40-59">Estoque: mercadoria escolhida, três quantidades inteiras e localização.</li>
+      <li data-linhas="61-64">Regra que envolve dois campos: só compara máxima e mínima se nenhuma delas já tiver erro. O erro fica na máxima.</li>
+      <li data-linhas="69-74">Põe o foco no primeiro campo com <code>aria-invalid="true"</code>. O <code>requestAnimationFrame</code> espera o próximo quadro de desenho, porque logo após <code>setErros</code> o React ainda não atualizou a página.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/lib/formatar.js" data-resumo="Formatação de números no padrão brasileiro.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-2">Cria os formatadores uma única vez (criar a cada chamada seria mais lento).</li>
+      <li data-linhas="4">25.9 → "R$ 25,90". O <code>Number()</code> garante que funcione mesmo se o valor chegar como texto.</li>
+      <li data-linhas="5">1234 → "1.234".</li>
+      <li data-linhas="7-9"><code>contar(1, 'mercadoria cadastrada', 'mercadorias cadastradas')</code> → "1 mercadoria cadastrada"; com 3 → "3 mercadorias cadastradas". Acerta o plural.</li>
+      <li data-linhas="11-12">O inverso para edição: 25.9 → "25,90", que é o que o usuário vê no campo de preço ao editar.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/lib/situacao.js" data-resumo="Regra de negócio: classifica um estoque em abaixo, faixa ou acima.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-5">Os textos mostrados para cada situação.</li>
+      <li data-linhas="7-11">Recebe um estoque (pega só os três campos de que precisa) e devolve <code>'abaixo'</code>, <code>'acima'</code> ou <code>'faixa'</code>. A palavra devolvida também vira classe CSS: <code>situacao-abaixo</code> fica vermelha.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-componentes">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Pasta <code>components/</code></h2>
+  <div class="arquivo" data-arquivo="src/components/Layout.jsx" data-resumo="Moldura de todas as telas: link de pular, cabeçalho, menu e a área onde a página entra.">
+    <ol class="passeio-notas">
+      <li data-linhas="5-7">Lê o caminho atual, guarda uma ref para o <code>&lt;main&gt;</code> e lembra o caminho anterior.</li>
+      <li data-linhas="9-14">Quando o caminho muda, foca o <code>&lt;h1&gt;</code> da tela nova (para o leitor de tela anunciá-la). A comparação com o caminho anterior evita roubar o foco na primeira abertura.</li>
+      <li data-linhas="16-19">O link "Pular para o conteúdo" foca o título em vez de mudar o <code>#</code> do endereço (que, no HashRouter, seria entendido como uma rota).</li>
+      <li data-linhas="26-30">Cabeçalho com o nome do sistema. <code>&lt;Link to="/"&gt;</code> troca de tela sem recarregar a página (um <code>&lt;a href&gt;</code> comum recarregaria).</li>
+      <li data-linhas="31-40">Menu. <code>NavLink</code> é um Link que sabe se está ativo: ele recebe <code>aria-current="page"</code> sozinho, e o CSS usa isso para sublinhar o item atual. Funciona também em subpáginas (em <code>/mercadorias/nova</code>, "Mercadorias" continua ativo).</li>
+      <li data-linhas="43-45"><code>&lt;Outlet /&gt;</code> é o espaço onde o React Router coloca a página da rota atual.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/Campo.jsx" data-resumo="Um campo de formulário completo: rótulo, dica, controle e mensagem de erro, já ligados para acessibilidade.">
+    <ol class="passeio-notas">
+      <li data-linhas="1">Recebe <code>id</code>, <code>rotulo</code>, <code>erro</code>, <code>dica</code> e <code>como</code> (qual tag usar: <code>'input'</code> por padrão, ou <code>'select'</code>). Ele é renomeado para <code>Controle</code> com maiúscula porque o JSX só trata como variável o que começa com maiúscula. <code>...props</code> junta todo o resto (value, onChange, inputMode...).</li>
+      <li data-linhas="2-4">Monta os ids da dica e do erro e junta os que existirem em <code>aria-describedby</code>, por exemplo <code>"preco-dica preco-erro"</code>.</li>
+      <li data-linhas="8">O <code>htmlFor</code> liga o rótulo ao campo: clicar no texto foca o campo.</li>
+      <li data-linhas="9-13">A dica só aparece se for passada.</li>
+      <li data-linhas="14-23">O controle em si. <code>name={id}</code> é o que a função <code>alterar</code> das páginas usa para saber qual campo mudou. <code>aria-invalid</code> só aparece quando há erro (o CSS deixa a borda vermelha). <code>{...props}</code> repassa o resto; se vier um <code>className</code>, ele substitui o padrão.</li>
+      <li data-linhas="24-28">A mensagem de erro, embaixo do campo.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/Alerta.jsx" data-resumo="Faixa verde (sucesso) ou vermelha (erro), anunciada por leitores de tela.">
+    <ol class="passeio-notas">
+      <li data-linhas="4">Recebe <code>aviso</code> no formato <code>{ tipo: 'sucesso' | 'erro', texto }</code> e, opcionalmente, <code>onFechar</code>.</li>
+      <li data-linhas="5-12">Cópia interna do aviso. Quando o aviso muda, apaga e, 60 ms depois, mostra de novo. Leitores de tela só anunciam texto que <em>entra</em> numa região já existente; esse pequeno atraso garante o anúncio, inclusive quando a mesma mensagem se repete.</li>
+      <li data-linhas="14-24">Função que desenha o alerta se o tipo bater. O botão "Fechar aviso" só aparece se a página passou <code>onFechar</code>.</li>
+      <li data-linhas="26-31">As duas regiões ficam sempre na página, vazias: <code>role="status"</code> (anúncio educado) para sucesso e <code>role="alert"</code> (anúncio imediato) para erro. O <code>&lt;&gt;...&lt;/&gt;</code> é um <em>Fragment</em>: agrupa sem criar tag extra.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/ConfirmarExclusao.jsx" data-resumo="Janela de confirmação antes de excluir.">
+    <ol class="passeio-notas">
+      <li data-linhas="3">Props: <code>aberto</code> (mostrar ou não), textos, <code>enviando</code> (exclusão em andamento) e as funções de confirmar e cancelar.</li>
+      <li data-linhas="4-5">Refs para o <code>&lt;dialog&gt;</code> real e para o botão Cancelar.</li>
+      <li data-linhas="7-15">O <code>&lt;dialog&gt;</code> do HTML abre com <code>showModal()</code> e fecha com <code>close()</code>, comandos que não se expressam por atributos. Este efeito traduz a prop <code>aberto</code> nesses comandos. Ao abrir, foca Cancelar, para que um Enter acidental não exclua nada.</li>
+      <li data-linhas="17-20">Esc dispara o evento <code>cancel</code>. O <code>preventDefault</code> impede o navegador de fechar sozinho; quem fecha é o React, via <code>onCancelar</code>. Durante a exclusão, o Esc é ignorado.</li>
+      <li data-linhas="23-29">Os atributos <code>aria-labelledby</code>/<code>aria-describedby</code> fazem o leitor de tela ler título e mensagem ao abrir.</li>
+      <li data-linhas="33-38">Botões desabilitados durante o envio; "Excluir" vira "Excluindo...".</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/Carregando.jsx" data-resumo="Mensagem de carregamento.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-7">Um parágrafo com <code>role="status"</code>. O CSS (<code>.carregando</code>) dá a aparência.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/EstadoErro.jsx" data-resumo="Caixa de erro de carregamento com botão de tentar de novo.">
+    <ol class="passeio-notas">
+      <li data-linhas="2">Só oferece "Tentar de novo" se a página passou <code>onTentar</code> e o erro não for 404 (tentar de novo não faria o registro aparecer).</li>
+      <li data-linhas="5-6">Mostra a mensagem do <code>ErroApi</code>, ou uma genérica. <code>?.</code> evita erro se <code>erro</code> for nulo.</li>
+      <li data-linhas="7-14">Botão e, depois dele, o que a página passou como <code>children</code> (por exemplo, um link "Voltar para a lista").</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/components/EstadoVazio.jsx" data-resumo="Caixa mostrada quando a lista não tem itens.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-8">Texto explicativo e um <code>children</code> (geralmente o link para cadastrar o primeiro item).</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-paginas">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Pasta <code>pages/</code></h2>
+  <p>Todas as páginas seguem o mesmo roteiro: <strong>(1)</strong> hooks no topo, <strong>(2)</strong> funções que respondem a ações, <strong>(3)</strong> uma variável <code>conteudo</code> escolhida pelo status (carregando / erro / vazio / dados), <strong>(4)</strong> o <code>return</code> com cabeçalho, alerta e conteúdo.</p>
+  <div class="arquivo" data-arquivo="src/pages/Inicio.jsx" data-resumo="Tela inicial: totais de registros e alerta de estoques abaixo do mínimo.">
+    <ol class="passeio-notas">
+      <li data-linhas="9"><code>Promise.all</code> faz as duas buscas <strong>ao mesmo tempo</strong> e espera as duas. A função fica fora do componente para não ser recriada a cada redesenho.</li>
+      <li data-linhas="11-14">Dados das duas linhas da tabela. Fazer uma lista e usar <code>.map</code> evita repetir o mesmo JSX duas vezes.</li>
+      <li data-linhas="17-21">Carrega; separa o resultado em <code>[mercadorias, estoques]</code>; calcula os totais e quantos estoques estão abaixo do mínimo usando <code>situacaoDe</code>.</li>
+      <li data-linhas="23-27">O texto da coluna Registros depende do status.</li>
+      <li data-linhas="36">Se deu erro, mostra a caixa de erro com "Tentar de novo" e a tabela continua (com "Indisponível").</li>
+      <li data-linhas="48"><code>aria-busy</code> avisa tecnologias assistivas que a tabela está carregando.</li>
+      <li data-linhas="49-62">Uma linha por entidade, com links para a lista e o cadastro. <code>key</code> ajuda o React a identificar cada linha.</li>
+      <li data-linhas="67-80">Só quando pronto: frase verde se nada está abaixo do mínimo, ou destaque com link para <code>/estoques?situacao=abaixo</code>.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/pages/MercadoriasLista.jsx" data-resumo="Tabela de mercadorias com editar e excluir.">
+    <ol class="passeio-notas">
+      <li data-linhas="13-18">Título da aba, ref do <code>h1</code>, aviso vindo de outra tela, a lista carregada, o item a excluir (<code>alvo</code>) e se a exclusão está em andamento.</li>
+      <li data-linhas="20-34">Exclusão: chama a API; se deu certo, tira a linha da lista local, mostra aviso e devolve o foco ao título. Se falhou, mostra o erro; se foi 404, recarrega a lista. <code>finally</code> roda nos dois casos e fecha o diálogo.</li>
+      <li data-linhas="36-46">Escolhe o que mostrar: carregando, erro ou lista vazia.</li>
+      <li data-linhas="47-88">A tabela. <code>contar</code> monta a legenda; <code>formatarMoeda</code> mostra o preço. Os botões têm <code>aria-label</code> com o nome do item.</li>
+      <li data-linhas="77"><code>onClick={() =&gt; setAlvo(mercadoria)}</code>: a seta cria uma função que só roda no clique. Escrever <code>onClick={setAlvo(mercadoria)}</code> executaria na hora.</li>
+      <li data-linhas="91-110">Cabeçalho com "Nova mercadoria", o Alerta (com botão de fechar), o conteúdo e o diálogo, que fica sempre na página e só abre quando há <code>alvo</code>.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/pages/MercadoriaForm.jsx" data-resumo="Formulário de mercadoria; serve para cadastrar e para editar.">
+    <ol class="passeio-notas">
+      <li data-linhas="12">Valores iniciais: tudo vazio.</li>
+      <li data-linhas="15-18">Se existe <code>id</code> na URL, é edição. O título muda conforme o modo.</li>
+      <li data-linhas="20-25">Estados: valores digitados, erros por campo, aviso no topo e se está enviando.</li>
+      <li data-linhas="26">Na edição, busca a mercadoria; no cadastro, devolve <code>null</code> na hora (<code>Promise.resolve</code>). A chave <code>id</code> faz recarregar se o id mudar.</li>
+      <li data-linhas="28-30">Quando os dados chegam, preenche o formulário. O preço vira texto com vírgula ("25,90").</li>
+      <li data-linhas="32-36"><code>alterar</code> serve para todos os campos: usa o <code>name</code> do input para saber qual mudou (<code>[name]: value</code>). Na linha 35, a desestruturação separa o erro daquele campo (<code>_removido</code>) do <code>resto</code> e guarda só o resto: o erro some ao digitar.</li>
+      <li data-linhas="38-46">Ao enviar: <code>preventDefault</code> impede o navegador de recarregar a página (comportamento padrão de formulários). Valida; se houver erro, mostra e foca o primeiro.</li>
+      <li data-linhas="48-49">Marca envio e monta o corpo: nome sem espaços nas pontas e preço como número.</li>
+      <li data-linhas="50-53">Cria ou atualiza. Com sucesso, volta para a lista levando o aviso no <code>state</code> da navegação.</li>
+      <li data-linhas="54-61">Com erro: reabilita o botão; se o backend mandou erros por campo, mostra-os nos campos; sempre mostra o aviso vermelho.</li>
+      <li data-linhas="75"><code>noValidate</code> desliga as validações nativas do navegador (balões em inglês), pois o projeto faz as suas.</li>
+      <li data-linhas="76-87">Os dois campos usando o componente <code>Campo</code>. <code>inputMode="decimal"</code> abre o teclado numérico no celular.</li>
+      <li data-linhas="89-91">O botão fica desabilitado e com outro texto enquanto envia, evitando clique duplo.</li>
+      <li data-linhas="104">Na edição, mostra o id ao lado do título.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/pages/EstoquesLista.jsx" data-resumo="Tabela de estoques com coluna de situação e filtro de abaixo do mínimo.">
+    <ol class="passeio-notas">
+      <li data-linhas="16-17"><code>useSearchParams</code> lê a parte <code>?situacao=abaixo</code> do endereço. Guardar o filtro na URL permite compartilhar o link e usar o botão voltar.</li>
+      <li data-linhas="23-40">Exclusão: mesma lógica da lista de mercadorias.</li>
+      <li data-linhas="42">Filtra no próprio navegador. Se <code>soAbaixo</code> for falso, mostra tudo. <code>?? []</code> garante uma lista enquanto os dados não chegam.</li>
+      <li data-linhas="49-60">Dois "vazios" diferentes: nenhum estoque cadastrado, ou nenhum que passe no filtro.</li>
+      <li data-linhas="62-64">Legenda conforme o filtro.</li>
+      <li data-linhas="83-92">Para cada linha calcula a situação. A classe <code>situacao-abaixo</code>/<code>-acima</code> colore a célula.</li>
+      <li data-linhas="127-137">O link do filtro: liga ou desliga apenas mudando a URL.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/pages/EstoqueForm.jsx" data-resumo="Formulário de estoque; precisa da lista de mercadorias para o campo de seleção.">
+    <ol class="passeio-notas">
+      <li data-linhas="13-14">Valores vazios e a lista de campos que precisam virar número antes de enviar.</li>
+      <li data-linhas="28-32">Carrega <strong>duas coisas ao mesmo tempo</strong>: a lista de mercadorias (para o <code>&lt;select&gt;</code>) e, na edição, o estoque. No cadastro o segundo item é <code>null</code>.</li>
+      <li data-linhas="34-43">Preenche o formulário convertendo os números para texto, porque inputs trabalham com texto.</li>
+      <li data-linhas="45-49">Igual ao <code>alterar</code> do formulário de mercadoria.</li>
+      <li data-linhas="61-66">Monta o corpo: copia os valores, apara a localização e converte os quatro campos numéricos com <code>Number()</code>.</li>
+      <li data-linhas="70-71">A mensagem de sucesso usa o que o backend devolveu (<code>nomeMercadoria</code> vem pronto da API).</li>
+      <li data-linhas="92-99">Se não há mercadorias, não dá para criar estoque: mostra um aviso com link para cadastrar uma.</li>
+      <li data-linhas="101-102">O <code>&lt;fieldset disabled&gt;</code> desabilita todos os campos de uma vez (sem mercadorias ou durante o envio). A <code>legend</code> oculta dá nome ao grupo para leitores de tela.</li>
+      <li data-linhas="103-110">O <code>Campo</code> com <code>como="select"</code>: as opções vêm da lista de mercadorias.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/pages/NaoEncontrada.jsx" data-resumo="Tela para endereços desconhecidos ou ids inválidos.">
+    <ol class="passeio-notas">
+      <li data-linhas="4-16">Título e link para o início. Aparece pela rota <code>*</code> e pelo <code>ComIdNumerico</code>.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="cod-estilos">
+  <p class="chapeu">Código linha a linha</p>
+  <h2>Pasta <code>styles/</code></h2>
+  <div class="arquivo" data-arquivo="src/styles/tokens.css" data-resumo="Variáveis de design: cores, espaçamentos, larguras e fontes.">
+    <ol class="passeio-notas">
+      <li data-linhas="1"><code>:root</code> é o elemento <code>&lt;html&gt;</code>. Variáveis declaradas aqui valem na página inteira.</li>
+      <li data-linhas="2-9">Fundo, superfícies, bordas e texto: tons neutros levemente quentes.</li>
+      <li data-linhas="10-12">Cor de destaque (verde-azulado): links, botão principal, foco.</li>
+      <li data-linhas="13-15">Vermelhos de erro e exclusão.</li>
+      <li data-linhas="18-24">Escala de espaçamento de 4 px (0.25rem) a 48 px (3rem). Usar sempre a escala deixa o visual consistente.</li>
+      <li data-linhas="26-28">Arredondamento e larguras máximas do conteúdo (960 px) e dos formulários (480 px).</li>
+      <li data-linhas="30-35">Fontes (com alternativas caso a IBM Plex não carregue) e tamanhos de texto.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/styles/base.css" data-resumo="Estilo padrão das tags HTML.">
+    <ol class="passeio-notas">
+      <li data-linhas="1-5"><code>box-sizing: border-box</code>: a largura inclui a borda e o espaçamento interno. Facilita muito o layout.</li>
+      <li data-linhas="11-18">Fundo, cor e fonte da página toda, usando as variáveis.</li>
+      <li data-linhas="20-36">Tira margens padrão e define tamanhos dos títulos.</li>
+      <li data-linhas="42-49">Links com a cor de destaque.</li>
+      <li data-linhas="51-56">Botões e campos herdam a fonte da página (por padrão o navegador usa outra).</li>
+      <li data-linhas="58-66">Contorno de foco para teclado. Títulos focados por código (<code>tabindex="-1"</code>) não ganham contorno.</li>
+      <li data-linhas="68-78">Truque clássico para esconder algo da vista sem esconder do leitor de tela.</li>
+    </ol>
+  </div>
+  <div class="arquivo" data-arquivo="src/styles/componentes.css" data-resumo="Classes de todos os componentes visuais.">
+    <ol class="passeio-notas">
+      <li data-linhas="2-16"><code>.pular</code>: fica fora da tela (<code>top: -3rem</code>) e desce quando recebe foco.</li>
+      <li data-linhas="17-69">Cabeçalho, marca e menu. <code>.nav a[aria-current='page']</code> sublinha o item da tela atual (o atributo vem do <code>NavLink</code>).</li>
+      <li data-linhas="70-102">Área de conteúdo, cabeçalho das páginas (título + botão lado a lado), identificador e linha de ações.</li>
+      <li data-linhas="103-180">Botões e variações: principal, perigo, perigo cheio (no diálogo), pequeno e só texto.</li>
+      <li data-linhas="181-264">Tabelas (com rolagem horizontal no celular), números alinhados à direita, cores da situação e o parágrafo do filtro.</li>
+      <li data-linhas="265-317">Alertas e as caixas de vazio, erro e carregando.</li>
+      <li data-linhas="318-396">Formulário, campos, dica, erro e campos inválidos (<code>.controle[aria-invalid='true']</code>).</li>
+      <li data-linhas="397-419">Diálogo de confirmação e o fundo escurecido (<code>::backdrop</code>).</li>
+    </ol>
+  </div>
+</section>
+
+<section class="secao" id="nova-tela">
+  <p class="chapeu">Na prática</p>
+  <h2>Como criar uma tela nova</h2>
+  <p>Exemplo: uma tela "Fornecedores" que lista dados de <code>GET /fornecedores</code>.</p>
+  <ol class="passos-lista">
+    <li><strong>API</strong>: crie <code>src/api/fornecedores.js</code> copiando <code>mercadorias.js</code> e trocando o caminho.</li>
+    <li><strong>Página</strong>: crie <code>src/pages/FornecedoresLista.jsx</code> seguindo o roteiro das outras listas.</li>
+    <li><strong>Rota</strong>: em <code>App.jsx</code>, importe a página e adicione <code>&lt;Route path="fornecedores" element={&lt;FornecedoresLista /&gt;} /&gt;</code> dentro da rota do Layout.</li>
+    <li><strong>Menu</strong>: em <code>Layout.jsx</code>, adicione um <code>&lt;li&gt;&lt;NavLink to="/fornecedores"&gt;Fornecedores&lt;/NavLink&gt;&lt;/li&gt;</code>.</li>
+    <li><strong>Proxy</strong>: em <code>vite.config.js</code>, adicione <code>'/fornecedores': rotaApi</code>. Sem isso, em desenvolvimento a chamada não chega ao backend.</li>
+  </ol>
+  <pre class="bloco" data-realce="jsx">import { listarFornecedores } from '../api/fornecedores.js';
+import Carregando from '../components/Carregando.jsx';
+import EstadoErro from '../components/EstadoErro.jsx';
+import { useCarregar, useTitulo } from '../lib/hooks.js';
+
+export default function FornecedoresLista() {
+  useTitulo('Fornecedores');
+  const lista = useCarregar(listarFornecedores);
+
+  let conteudo;
+  if (lista.status === 'carregando') conteudo = &lt;Carregando texto="Carregando fornecedores..." /&gt;;
+  else if (lista.status === 'erro') conteudo = &lt;EstadoErro erro={lista.erro} onTentar={lista.recarregar} /&gt;;
+  else conteudo = (
+    &lt;ul&gt;{lista.dados.map((f) =&gt; &lt;li key={f.id}&gt;{f.nome}&lt;/li&gt;)}&lt;/ul&gt;
+  );
+
+  return (
+    &lt;&gt;
+      &lt;div className="cabecalho-pagina"&gt;&lt;h1 tabIndex={-1}&gt;Fornecedores&lt;/h1&gt;&lt;/div&gt;
+      {conteudo}
+    &lt;/&gt;
+  );
+}</pre>
+</section>
+
+<section class="secao" id="glossario">
+  <p class="chapeu">Consulta rápida</p>
+  <h2>Glossário</h2>
+  <dl class="glossario">
+    <dt>API / endpoint</dt><dd>Endereço do backend que recebe pedidos, como <code>GET /mercadorias</code>.</dd>
+    <dt>CORS</dt><dd>Regra de segurança dos navegadores: um site só pode chamar outro endereço se esse outro permitir. O proxy do Vite evita o problema em desenvolvimento.</dd>
+    <dt>CRUD</dt><dd>Create, Read, Update, Delete: cadastrar, consultar, alterar e excluir.</dd>
+    <dt>DOM</dt><dd>A estrutura da página na memória do navegador. O React altera o DOM por você.</dd>
+    <dt>Fragment (<code>&lt;&gt;...&lt;/&gt;</code>)</dt><dd>Agrupa elementos sem criar uma tag a mais.</dd>
+    <dt>HTTP 200 / 201 / 204</dt><dd>Sucesso / criado / sucesso sem conteúdo.</dd>
+    <dt>HTTP 400 / 404 / 409 / 500 / 502</dt><dd>Dados inválidos / não encontrado / conflito com regra / erro interno / intermediário não conseguiu falar com o servidor.</dd>
+    <dt>JSON</dt><dd>Formato de texto para trocar dados: <code>{ "nome": "Arroz", "preco": 25.9 }</code>.</dd>
+    <dt>Proxy</dt><dd>Intermediário que recebe uma chamada e repassa para outro endereço.</dd>
+    <dt>Redesenho (render)</dt><dd>Quando o React executa a função do componente de novo e atualiza a tela. Acontece quando estado ou props mudam.</dd>
+    <dt>Rota</dt><dd>Associação entre um endereço e uma tela.</dd>
+    <dt>SPA</dt><dd>Aplicação de página única: troca de tela sem recarregar.</dd>
+    <dt>Leitor de tela</dt><dd>Programa que lê a página em voz alta (NVDA, VoiceOver, Orca).</dd>
+  </dl>
+</section>
+
+</main>
+</div>
+
+<script src="fontes.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
